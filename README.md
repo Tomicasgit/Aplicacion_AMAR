@@ -18,10 +18,11 @@ Todos reciben y devuelven JSON. Para endpoints protegidos se utiliza `Authorizat
 | `register` | POST | No | Crea paciente/usuario y devuelve token. |
 | `login` | POST | No | Inicia sesión y devuelve token. |
 | `contacts` | GET/POST | Token de usuario | Consulta o agrega contactos de emergencia. |
+| `devices` | GET/POST | Token de usuario | Lista o vincula un ESP32 y devuelve su clave una sola vez. |
 | `dashboard` | GET | Token de usuario | Devuelve última lectura, alerta y estado de dispositivo. |
 | `reading` | POST | Clave ESP32 | Guarda `{ "bpm": 76 }`. |
 | `location` | POST | Clave ESP32 | Guarda `{ "latitude": -34.60, "longitude": -58.38 }`. |
 | `device-status` | POST | Clave ESP32 | Actualiza `{ "status": "online" }`. |
 | `alert` | POST | Clave ESP32 | Guarda alerta `panic`, `high_heart_rate` o `device`. |
 
-Para vincular un ESP32, creá antes un registro en `devices` con el `user_id` del paciente y una clave aleatoria de 64 caracteres en `device_key`. Esa clave se manda como Bearer token desde el dispositivo. BLE se gestiona entre el ESP32 y la aplicación cliente; el ESP32 envía luego los datos a esta API por Wi‑Fi/Internet.
+Para vincular un ESP32, iniciá sesión y enviá `POST` a `devices` con `{ "name": "Mi ESP32" }`. La respuesta devuelve `device_key` **una única vez**: guardala en el firmware y enviala como Bearer token desde el dispositivo. BLE se gestiona entre el ESP32 y la aplicación cliente; el ESP32 envía luego los datos a esta API por Wi‑Fi/Internet.
