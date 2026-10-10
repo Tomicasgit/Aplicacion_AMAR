@@ -710,10 +710,8 @@ async function editProfile() {
 
       const { error: saveError } = await supabaseClient
         .from('profiles')
-        .upsert(
-          { id: user.id, name },
-          { onConflict: 'id' }
-        );
+        .update({ name })
+        .eq('id', user.id);
 
       if (saveError) {
         console.error('Error al guardar el perfil:', saveError);
