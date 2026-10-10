@@ -11,16 +11,16 @@
       show('loginView');
     };
 
-    // Modal para vincular ESP32
+    // Modal para vincular ESP32 por Bluetooth
     $('#addDevice').onclick = () => openModal(`
       <h2>Vincular ESP32</h2>
-      <p>Registrá el dispositivo en tu cuenta. La conexión con el ESP32 se integrará mediante Bluetooth desde el navegador.</p>
+      <p>Encendé tu dispositivo A.M.A.R. y asegurate de tenerlo cerca.</p>
       <form id="deviceForm">
         <div class="field">
-          <label>Nombre del dispositivo</label>
+          <label>Nombre del dispositivo en tu cuenta</label>
           <input id="deviceName" value="ESP32 A.M.A.R." required>
         </div>
-        <button class="primary">Generar clave</button>
+        <button class="primary">Conectar por Bluetooth</button>
         <button type="button" class="secondary" onclick="closeModal()">Cancelar</button>
       </form>
     `);
@@ -62,44 +62,38 @@
       }
 
       try {
-        const { data: authData, error: authError } =
-          await supabaseClient.auth.getUser();
-
-        if (authError) throw authError;
-        if (!authData.user) throw new Error('Tu sesión expiró. Iniciá sesión nuevamente.');
-
-        const userId = authData.user.id;
-
         if (form.id === 'deviceForm') {
           const name = $('#deviceName').value.trim();
 
-          if (!name) throw new Error('Ingresá un nombre para el dispositivo.');
+          if (!name) {
+            throw new Error('Ingresá un nombre para el dispositivo.');
+          }
 
-          const { data, error } = await supabaseClient
-            .from('devices')
-            .insert({
-              user_id: userId,
-              name,
-              status: 'offline'
-            })
-            .select('id, name, status')
-            .single();
-
-          if (error) throw error;
+          const connectedName = await window.connectAMARBluetooth(name);
+          const safeName = name.replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;',
+            '"': '&quot;', "'": '&#39;'
+          }[c]));
 
           openModal(`
-            <h2>Dispositivo registrado</h2>
-            <p><strong>${data.name.replace(/[&<>"']/g, c => ({
-              '&': '&amp;', '<': '&lt;', '>': '&gt;',
-              '"': '&quot;', "'": '&#39;'
-            }[c]))}</strong> quedó asociado a tu cuenta.</p>
-            <p>Estado inicial: sin conexión.</p>
-            <p>La vinculación Bluetooth se implementará en el siguiente paso.</p>
+            <h2>ESP32 conectado</h2>
+            <p><strong>${safeName}</strong> está conectado por Bluetooth.</p>
+            <p>Dispositivo detectado: ${connectedName}</p>
+            <p>Las lecturas válidas se enviarán a tu historial si Supabase permite guardarlas.</p>
             <button class="primary" onclick="closeModal();loadDashboard()">Entendido</button>
           `);
         }
 
         if (form.id === 'contactForm') {
+          const { data: authData, error: authError } =
+            await supabaseClient.auth.getUser();
+
+          if (authError) throw authError;
+          if (!authData.user) {
+            throw new Error('Tu sesión expiró. Iniciá sesión nuevamente.');
+          }
+
+          const userId = authData.user.id;
           const name = $('#contactName').value.trim();
           const phone = $('#contactPhone').value.trim();
           const relationship = $('#contactRelation').value.trim();
