@@ -53,22 +53,33 @@ async function editProfile() {
         return;
       }
 
-      const { error: saveError } = await supabaseClient
-        .from('profiles')
-        .update({ name })
-        .eq('id', user.id);
+      const { data: updatedProfiles, error: saveError } =
+        await supabaseClient
+          .from('profiles')
+          .update({ name })
+          .eq('id', user.id)
+          .select('id');
 
       if (saveError) {
         console.error('Error al guardar el perfil:', saveError);
         message(
           '#profileMessage',
-          'No se pudo guardar. Revisá las políticas de profiles.'
+          'No se pudo guardar el nombre. Intentá nuevamente.'
+        );
+        return;
+      }
+
+      if (!updatedProfiles || updatedProfiles.length === 0) {
+        message(
+          '#profileMessage',
+          'No se actualizó el perfil. Verificá que exista y que tengas permiso para modificarlo.'
         );
         return;
       }
 
       closeModal();
       await loadDashboard(user);
+
     };
   } catch (error) {
     console.error('Error al editar el perfil:', error);
