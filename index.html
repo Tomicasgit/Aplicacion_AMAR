@@ -306,7 +306,73 @@
     .wide {
       grid-column: span 2;
     }
-    .danger {
+        .record-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .record-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    .record-info {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .record-info strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .record-info small {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .record-actions button {
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-weight: 700;
+    }
+
+    .edit-button {
+      background: #e8edff;
+      color: #3049a5;
+    }
+
+    .delete-button {
+      background: #ffe8ec;
+      color: #a51e39;
+    }
+
+    .secondary {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: white;
+      color: var(--ink);
+      font-weight: 700;
+    }
+	.danger {
       border-color: #ffcbd2;
       background: #fff6f7;
     }
@@ -526,7 +592,20 @@
           <small>Contactos de emergencia</small>
           <b id="contactsCount">0</b>
         </article>
-        <article class="card wide">
+                <article class="card wide">
+          <h3>Mis dispositivos</h3>
+          <div id="devicesList" class="record-list">
+            <p class="empty">Cargando dispositivos...</p>
+          </div>
+        </article>
+
+	 <article class="card wide">
+          <h3>Mis contactos de emergencia</h3>
+          <div id="contactsList" class="record-list">
+            <p class="empty">Cargando contactos...</p>
+          </div>
+        </article>
+	<article class="card wide">
           <h3>Ubicación más reciente</h3>
           <div class="empty" id="location">Todavía no se recibió una ubicación.</div>
         </article>
@@ -655,7 +734,267 @@
       }
     };
 
+    // Escapar texto antes de insertarlo en el HTML
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    // Mostrar todos los dispositivos del usuario autenticado
+    async function loadDevices(userId) {
+      const list = $('#devicesList');
+
+      const { data, error } = await supabaseClient
+        .from('devices')
+        .select('id, name, status, last_seen_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!data.length) {
+        list.innerHTML = '<p class="empty">Todavía no registraste dispositivos.</p>';
+        $('#deviceBadge').textContent = 'Sin dispositivo';
+        return;
+      }
+
+      list.innerHTML = data.map(device => `
+        <div class="record-item">
+          <div class="record-info">
+            <strong>${escapeHTML(device.name)}</strong>
+            <small>Estado: ${escapeHTML(device.status || 'Sin estado')}</small>
+            <br>
+            <small>Última conexión: ${
+              device.last_seen_at
+                ? escapeHTML(new Date(device.last_seen_at).toLocaleString())
+                : 'Sin conexión registrada'
+            }</small>
+          </div>
+          <div class="record-actions">
+            <button type="button" class="edit-button"
+              onclick="editDevice('${device.id}')">Editar</button>
+            <button type="button" class="delete-button"
+              onclick="deleteDevice('${device.id}')">Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+
+      $('#deviceBadge').textContent =
+        `${data[0].name}: ${data[0].status || 'Sin estado'}`;
+    }
+
+    // Mostrar todos los contactos de emergencia
+    async function loadContacts(userId) {
+      const list = $('#contactsList');
+
+      const { data, error } = await supabaseClient
+        .from('emergency_contacts')
+        .select('id, name, phone, relationship')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      $('#contactsCount').textContent = data.length;
+
+      if (!data.length) {
+        list.innerHTML = '<p class="empty">Todavía no agregaste contactos.</p>';
+        return;
+      }
+
+      list.innerHTML = data.map(contact => `
+        <div class="record-item">
+          <div class="record-info">
+            <strong>${escapeHTML(contact.name)}</strong>
+            <small>Teléfono: ${escapeHTML(contact.phone)}</small>
+            <br>
+            <small>Relación: ${escapeHTML(contact.relationship || 'No especificada')}</small>
+          </div>
+          <div class="record-actions">
+            <button type="button" class="edit-button"
+              onclick="editContact('${contact.id}')">Editar</button>
+            <button type="button" class="delete-button"
+              onclick="deleteContact('${contact.id}')">Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Abrir formulario para editar un dispositivo
+    async function editDevice(id) {
+      try {
+        const { data: auth, error: authError } =
+          await supabaseClient.auth.getUser();
+
+        if (authError) throw authError;
+        if (!auth.user) throw new Error('Tu sesión expiró.');
+
+        const { data, error } = await supabaseClient
+          .from('devices')
+          .select('id, name')
+          .eq('id', id)
+          .eq('user_id', auth.user.id)
+          .single();
+
+        if (error) throw error;
+
+        openModal(`
+          <h2>Editar dispositivo</h2>
+          <form id="editDeviceForm">
+            <div class="field">
+              <label for="editDeviceName">Nombre del dispositivo</label>
+              <input id="editDeviceName" required maxlength="100"
+                value="${escapeHTML(data.name)}">
+            </div>
+            <button class="primary" type="submit">Guardar cambios</button>
+            <button class="secondary" type="button" onclick="closeModal()">Cancelar</button>
+          </form>
+        `);
+
+        $('#editDeviceForm').onsubmit = async event => {
+          event.preventDefault();
+          const name = $('#editDeviceName').value.trim();
+          if (!name) return alert('Ingresá un nombre.');
+
+          const { error: updateError } = await supabaseClient
+            .from('devices')
+            .update({ name })
+            .eq('id', id)
+            .eq('user_id', auth.user.id);
+
+          if (updateError) return alert(updateError.message);
+
+          closeModal();
+          await loadDashboard(auth.user);
+        };
+      } catch (error) {
+        alert(error.message || 'No se pudo abrir el dispositivo.');
+      }
+    }
+
+    // Abrir formulario para editar un contacto
+    async function editContact(id) {
+      try {
+        const { data: auth, error: authError } =
+          await supabaseClient.auth.getUser();
+
+        if (authError) throw authError;
+        if (!auth.user) throw new Error('Tu sesión expiró.');
+
+        const { data, error } = await supabaseClient
+          .from('emergency_contacts')
+          .select('id, name, phone, relationship')
+          .eq('id', id)
+          .eq('user_id', auth.user.id)
+          .single();
+
+        if (error) throw error;
+
+        openModal(`
+          <h2>Editar contacto</h2>
+          <form id="editContactForm">
+            <div class="field">
+              <label for="editContactName">Nombre</label>
+              <input id="editContactName" required maxlength="100"
+                value="${escapeHTML(data.name)}">
+            </div>
+            <div class="field">
+              <label for="editContactPhone">Teléfono</label>
+              <input id="editContactPhone" type="tel" required maxlength="40"
+                value="${escapeHTML(data.phone)}">
+            </div>
+            <div class="field">
+              <label for="editContactRelation">Relación</label>
+              <input id="editContactRelation" maxlength="100"
+                value="${escapeHTML(data.relationship || '')}">
+            </div>
+            <button class="primary" type="submit">Guardar cambios</button>
+            <button class="secondary" type="button" onclick="closeModal()">Cancelar</button>
+          </form>
+        `);
+
+        $('#editContactForm').onsubmit = async event => {
+          event.preventDefault();
+
+          const name = $('#editContactName').value.trim();
+          const phone = $('#editContactPhone').value.trim();
+          const relationship = $('#editContactRelation').value.trim();
+
+          if (!name || !phone) {
+            return alert('Completá el nombre y el teléfono.');
+          }
+
+          const { error: updateError } = await supabaseClient
+            .from('emergency_contacts')
+            .update({ name, phone, relationship: relationship || null })
+            .eq('id', id)
+            .eq('user_id', auth.user.id);
+
+          if (updateError) return alert(updateError.message);
+
+          closeModal();
+          await loadDashboard(auth.user);
+        };
+      } catch (error) {
+        alert(error.message || 'No se pudo abrir el contacto.');
+      }
+    }
+
+    // Eliminar un dispositivo después de confirmar
+    async function deleteDevice(id) {
+      if (!confirm('¿Querés eliminar este dispositivo de tu cuenta?')) return;
+
+      try {
+        const { data: auth, error: authError } =
+          await supabaseClient.auth.getUser();
+
+        if (authError) throw authError;
+        if (!auth.user) throw new Error('Tu sesión expiró.');
+
+        const { error } = await supabaseClient
+          .from('devices')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', auth.user.id);
+
+        if (error) throw error;
+        await loadDashboard(auth.user);
+      } catch (error) {
+        alert(error.message || 'No se pudo eliminar el dispositivo.');
+      }
+    }
+
+    // Eliminar un contacto después de confirmar
+    async function deleteContact(id) {
+      if (!confirm('¿Querés eliminar este contacto de emergencia?')) return;
+
+      try {
+        const { data: auth, error: authError } =
+          await supabaseClient.auth.getUser();
+
+        if (authError) throw authError;
+        if (!auth.user) throw new Error('Tu sesión expiró.');
+
+        const { error } = await supabaseClient
+          .from('emergency_contacts')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', auth.user.id);
+
+        if (error) throw error;
+        await loadDashboard(auth.user);
+      } catch (error) {
+        alert(error.message || 'No se pudo eliminar el contacto.');
+      }
+    }
+
     // Carga del panel desde las tablas de Supabase
+
     async function loadDashboard(user = null) {
       try {
         if (!user) {
@@ -669,7 +1008,14 @@
           return;
         }
 
+        // Cargar las listas completas del usuario autenticado
+        await Promise.all([
+          loadDevices(user.id),
+          loadContacts(user.id)
+        ]);
+
         const results = await Promise.all([
+
           supabaseClient
             .from('profiles')
             .select('name')
