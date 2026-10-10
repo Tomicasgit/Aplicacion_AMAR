@@ -679,7 +679,23 @@
   }
 }
 
-</style>
+
+    .dashboard-section {
+      display: none;
+    }
+
+    .dashboard-section.active {
+      display: block;
+    }
+
+    .daily-summary-card {
+      min-width: 0;
+    }
+
+    .nav button {
+      cursor: pointer;
+    }
+\n</style>
 </head>
 <body>
 
@@ -756,9 +772,10 @@
     <aside class="side">
       <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
       <nav class="nav">
-        <button class="active">▦ Inicio</button>
-        <button id="addDevice">⌁ Vincular ESP32</button>
-        <button id="addContact">♧ Contactos</button>
+        <button type="button" class="active" data-panel="homeSection">▦ Inicio</button>
+        <button type="button" data-panel="historySection">▤ Historial</button>
+        <button id="addDevice" type="button">⌁ Vincular ESP32</button>
+        <button id="addContact" type="button">♧ Contactos</button>
       </nav>
       <button class="logout" id="logout">Cerrar sesión</button>
     </aside>
@@ -771,6 +788,7 @@
         </div>
         <span id="deviceBadge" class="badge">Sin dispositivo</span>
       </header>
+      <div id="homeSection" class="dashboard-section active">
       <div class="grid">
         <article class="card pulse">
           <h3>Frecuencia cardíaca</h3>
@@ -783,31 +801,15 @@
           <small>Última lectura</small>
           <b id="readingTime">Sin datos</b>
         </article>
+        <article class="card wide daily-summary-card">
+          <h3>Resumen de hoy</h3>
+          <div id="dailySummary" class="calendar-summary">
+            <p class="empty">Cargando resumen diario...</p>
+          </div>
+        </article>
 
-<article class="card wide heart-history-card">
-  <h3>Seguimiento cardíaco</h3>
-  <div class="calendar-toolbar">
-    <button type="button" id="prevMonth" class="calendar-nav" aria-label="Mes anterior">&#8592;</button>
-    <strong id="calendarMonth">Cargando mes...</strong>
-    <button type="button" id="nextMonth" class="calendar-nav" aria-label="Mes siguiente">&#8594;</button>
-  </div>
-  <div class="calendar-legend">
-    <span><i class="legend-dot has-readings"></i> Día con mediciones</span>
-    <span><i class="legend-dot"></i> Sin mediciones</span>
-  </div>
-  <div id="calendarGrid" class="calendar-grid" aria-label="Calendario mensual"></div>
-  <div id="calendarSummary" class="calendar-summary">
-    <p class="empty">Cargando resumen mensual...</p>
-  </div>
-  <div class="selected-day">
-    <h4 id="selectedDateTitle">Mediciones del día</h4>
-    <div id="historyList" class="record-list">
-      <p class="empty">Cargando historial...</p>
-    </div>
-  </div>
-</article>
 
-	 <article class="card metric">
+        <article class="card metric">
           <small>Contactos de emergencia</small>
           <b id="contactsCount">0</b>
         </article>
@@ -832,7 +834,34 @@
           <h3>Última alerta</h3>
           <div class="empty" id="alert">No hay alertas registradas.</div>
         </article>
+
       </div>
+      </div>
+
+        <div id="historySection" class="dashboard-section">
+<article class="card wide heart-history-card">
+  <h3>Seguimiento cardíaco</h3>
+  <div class="calendar-toolbar">
+    <button type="button" id="prevMonth" class="calendar-nav" aria-label="Mes anterior">&#8592;</button>
+    <strong id="calendarMonth">Cargando mes...</strong>
+    <button type="button" id="nextMonth" class="calendar-nav" aria-label="Mes siguiente">&#8594;</button>
+  </div>
+  <div class="calendar-legend">
+    <span><i class="legend-dot has-readings"></i> Día con mediciones</span>
+    <span><i class="legend-dot"></i> Sin mediciones</span>
+  </div>
+  <div id="calendarGrid" class="calendar-grid" aria-label="Calendario mensual"></div>
+  <div id="calendarSummary" class="calendar-summary">
+    <p class="empty">Cargando resumen mensual...</p>
+  </div>
+  <div class="selected-day">
+    <h4 id="selectedDateTitle">Mediciones del día</h4>
+    <div id="historyList" class="record-list">
+      <p class="empty">Cargando historial...</p>
+    </div>
+  </div>
+</article>
+        </div>
     </section>
   </main>
 
@@ -854,6 +883,21 @@
     function show(id) {
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
     }
+
+    // Navegación interna entre Inicio e Historial.
+    document.querySelectorAll('[data-panel]').forEach(button => {
+      button.addEventListener('click', () => {
+        const target = button.dataset.panel;
+
+        document.querySelectorAll('.dashboard-section').forEach(section => {
+          section.classList.toggle('active', section.id === target);
+        });
+
+        document.querySelectorAll('.nav [data-panel]').forEach(item => {
+          item.classList.toggle('active', item === button);
+        });
+      });
+    });
 
     function message(id, text, isSuccess = false) {
       const el = $(id);
@@ -1315,6 +1359,43 @@ async function editProfile() {
       });
     }
 
+    function renderDailySummary() {
+      const container = $('#dailySummary');
+      if (!container) return;
+
+      const today = localDateKey(new Date());
+      const readings = readingsForDate(today);
+      const values = readings
+        .map(reading => Number(reading.lpm))
+        .filter(value => Number.isFinite(value) && value > 0);
+
+      const average = values.length
+        ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+        : null;
+      const minimum = values.length ? Math.min(...values) : null;
+      const maximum = values.length ? Math.max(...values) : null;
+
+      container.innerHTML = `
+        <div class="calendar-stat">
+          <small>Lecturas de hoy</small>
+          <strong>${readings.length}</strong>
+        </div>
+        <div class="calendar-stat">
+          <small>Promedio de hoy</small>
+          <strong>${average === null ? '—' : average + ' LPM'}</strong>
+        </div>
+        <div class="calendar-stat">
+          <small>Mínimo de hoy</small>
+          <strong>${minimum === null ? '—' : minimum + ' LPM'}</strong>
+        </div>
+        <div class="calendar-stat">
+          <small>Máximo de hoy</small>
+          <strong>${maximum === null ? '—' : maximum + ' LPM'}</strong>
+        </div>
+        ${readings.length ? '' : '<p class="empty">Todavía no hay mediciones registradas hoy.</p>'}
+      `;
+    }
+
     function renderMonthlySummary() {
       const el = $('#calendarSummary');
       if (!el) return;
@@ -1435,6 +1516,7 @@ async function editProfile() {
       heartReadings = data || [];
       selectedCalendarDate = localDateKey(new Date());
       calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      renderDailySummary();
       renderCalendar();
     }
 
