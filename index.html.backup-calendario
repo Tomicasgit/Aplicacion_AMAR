@@ -485,201 +485,7 @@
         font-size: 10px;
       }
     }
-
-/* Calendario de seguimiento cardíaco */
-.heart-history-card {
-  min-width: 0;
-}
-
-.calendar-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.calendar-toolbar strong {
-  text-align: center;
-  text-transform: capitalize;
-  font-size: 1.05rem;
-}
-
-.calendar-nav {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 1.3rem;
-  cursor: pointer;
-}
-
-.calendar-nav:hover {
-  border-color: var(--good);
-}
-
-.calendar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin: 16px 0 12px;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-.calendar-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.legend-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: transparent;
-}
-
-.legend-dot.has-readings {
-  border-color: var(--good);
-  background: var(--good);
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.calendar-weekday {
-  padding: 8px 0;
-  color: var(--muted);
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.calendar-day {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  min-width: 0;
-  min-height: 48px;
-  padding: 6px 2px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: var(--bg);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.calendar-day:disabled {
-  border-color: transparent;
-  background: transparent;
-  cursor: default;
-}
-
-.calendar-day:not(:disabled):hover {
-  border-color: var(--good);
-}
-
-.calendar-day.has-data {
-  border-color: var(--good);
-}
-
-.calendar-day.selected {
-  outline: 2px solid var(--good);
-  outline-offset: 1px;
-}
-
-.calendar-day.today .day-number {
-  font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.day-number {
-  font-size: 0.9rem;
-}
-
-.day-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: transparent;
-}
-
-.calendar-day.has-data .day-indicator {
-  background: var(--good);
-}
-
-.calendar-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.calendar-stat {
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-}
-
-.calendar-stat small {
-  display: block;
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-.calendar-stat strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 1.15rem;
-  overflow-wrap: anywhere;
-}
-
-.selected-day {
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-}
-
-.selected-day h4 {
-  margin: 0 0 12px;
-}
-
-@media (max-width: 520px) {
-  .calendar-grid {
-    gap: 4px;
-  }
-
-  .calendar-day {
-    min-height: 42px;
-    border-radius: 7px;
-  }
-
-  .calendar-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .calendar-legend {
-    gap: 8px 12px;
-  }
-}
-
-</style>
+  </style>
 </head>
 <body>
 
@@ -784,26 +590,10 @@
           <b id="readingTime">Sin datos</b>
         </article>
 
-<article class="card wide heart-history-card">
-  <h3>Seguimiento cardíaco</h3>
-  <div class="calendar-toolbar">
-    <button type="button" id="prevMonth" class="calendar-nav" aria-label="Mes anterior">&#8592;</button>
-    <strong id="calendarMonth">Cargando mes...</strong>
-    <button type="button" id="nextMonth" class="calendar-nav" aria-label="Mes siguiente">&#8594;</button>
-  </div>
-  <div class="calendar-legend">
-    <span><i class="legend-dot has-readings"></i> Día con mediciones</span>
-    <span><i class="legend-dot"></i> Sin mediciones</span>
-  </div>
-  <div id="calendarGrid" class="calendar-grid" aria-label="Calendario mensual"></div>
-  <div id="calendarSummary" class="calendar-summary">
-    <p class="empty">Cargando resumen mensual...</p>
-  </div>
-  <div class="selected-day">
-    <h4 id="selectedDateTitle">Mediciones del día</h4>
-    <div id="historyList" class="record-list">
-      <p class="empty">Cargando historial...</p>
-    </div>
+<article class="card wide">
+  <h3>Historial de frecuencia cardíaca</h3>
+  <div id="historyList" class="record-list">
+    <p class="empty">Cargando historial...</p>
   </div>
 </article>
 
@@ -1292,170 +1082,51 @@ async function editProfile() {
       }
     }
 
-    let heartReadings = [];
-    let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    let selectedCalendarDate = localDateKey(new Date());
-
-    function localDateKey(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
-    function dateFromKey(key) {
-      const [y, m, d] = key.split('-').map(Number);
-      return new Date(y, m - 1, d);
-    }
-
-    function readingsForDate(key) {
-      return heartReadings.filter(r => {
-        const date = new Date(r.recorded_at);
-        return !Number.isNaN(date.getTime()) && localDateKey(date) === key;
-      });
-    }
-
-    function renderMonthlySummary() {
-      const el = $('#calendarSummary');
-      if (!el) return;
-
-      const year = calendarMonth.getFullYear();
-      const month = calendarMonth.getMonth();
-      const rows = heartReadings.filter(r => {
-        const d = new Date(r.recorded_at);
-        return !Number.isNaN(d.getTime()) &&
-          d.getFullYear() === year && d.getMonth() === month;
-      });
-
-      const days = new Set(rows.map(r => localDateKey(new Date(r.recorded_at))));
-      const values = rows.map(r => Number(r.lpm)).filter(n => Number.isFinite(n) && n > 0);
-      const avg = values.length
-        ? Math.round(values.reduce((a, b) => a + b, 0) / values.length)
-        : null;
-      const min = values.length ? Math.min(...values) : null;
-      const max = values.length ? Math.max(...values) : null;
-
-      el.innerHTML = `
-        <div class="calendar-stat"><small>Días con mediciones</small><strong>${days.size}</strong></div>
-        <div class="calendar-stat"><small>Total de lecturas</small><strong>${rows.length}</strong></div>
-        <div class="calendar-stat"><small>Promedio del mes</small><strong>${avg === null ? '—' : avg + ' LPM'}</strong></div>
-        <div class="calendar-stat"><small>Mín. / Máx.</small><strong>${min === null ? '—' : min + ' / ' + max}</strong></div>
-      `;
-    }
-
-    function renderSelectedDay() {
-      const title = $('#selectedDateTitle');
-      const container = $('#historyList');
-      if (!title || !container) return;
-
-      const date = dateFromKey(selectedCalendarDate);
-      title.textContent = 'Mediciones del ' + date.toLocaleDateString('es-AR', {
-        day: 'numeric', month: 'long', year: 'numeric'
-      });
-
-      const rows = readingsForDate(selectedCalendarDate)
-        .sort((a, b) => new Date(b.recorded_at) - new Date(a.recorded_at));
-
-      if (!rows.length) {
-        container.innerHTML = '<p class="empty">No hay mediciones registradas para este día.</p>';
-        return;
-      }
-
-      container.innerHTML = rows.map(r => {
-        const date = new Date(r.recorded_at);
-        const time = Number.isNaN(date.getTime())
-          ? 'Hora no disponible'
-          : date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-
-        return `<div class="record-item"><div class="record-info">
-          <strong>${escapeHTML(String(r.lpm))} LPM</strong>
-          <small>${escapeHTML(time)}</small>
-        </div></div>`;
-      }).join('');
-    }
-
-    function renderCalendar() {
-      const grid = $('#calendarGrid');
-      const label = $('#calendarMonth');
-      if (!grid || !label) return;
-
-      const year = calendarMonth.getFullYear();
-      const month = calendarMonth.getMonth();
-      label.textContent = calendarMonth.toLocaleDateString('es-AR', {
-        month: 'long', year: 'numeric'
-      });
-
-      const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      const offset = (new Date(year, month, 1).getDay() + 6) % 7;
-      const total = new Date(year, month + 1, 0).getDate();
-      const today = localDateKey(new Date());
-
-      let html = weekdays.map(d => `<div class="calendar-weekday">${d}</div>`).join('');
-      for (let i = 0; i < offset; i++) html += '<div aria-hidden="true"></div>';
-
-      for (let day = 1; day <= total; day++) {
-        const key = localDateKey(new Date(year, month, day));
-        const hasData = readingsForDate(key).length > 0;
-        const classes = [
-          'calendar-day',
-          hasData ? 'has-data' : '',
-          key === selectedCalendarDate ? 'selected' : '',
-          key === today ? 'today' : ''
-        ].filter(Boolean).join(' ');
-
-        html += `<button type="button" class="${classes}"
-          data-calendar-date="${key}" aria-pressed="${key === selectedCalendarDate}">
-          <span class="day-number">${day}</span><span class="day-indicator"></span>
-        </button>`;
-      }
-
-      grid.innerHTML = html;
-      renderMonthlySummary();
-      renderSelectedDay();
-    }
-
+    // Cargar las últimas 20 mediciones del usuario
     async function loadHeartHistory(userId) {
       const container = $('#historyList');
-      if (container) container.innerHTML = '<p class="empty">Cargando historial...</p>';
+
+      if (!container) return;
+
+      container.innerHTML =
+        '<p class="empty">Cargando historial...</p>';
 
       const { data, error } = await supabaseClient
         .from('heart_readings')
         .select('lpm, recorded_at')
         .eq('user_id', userId)
-        .order('recorded_at', { ascending: true });
+        .order('recorded_at', { ascending: false })
+        .limit(20);
 
       if (error) {
         console.error('Error al cargar el historial:', error);
-        if (container) container.innerHTML = '<p class="empty">No se pudo cargar el historial.</p>';
-        const summary = $('#calendarSummary');
-        if (summary) summary.innerHTML = '<p class="empty">No se pudo cargar el resumen mensual.</p>';
+        container.innerHTML =
+          '<p class="empty">No se pudo cargar el historial.</p>';
         return;
       }
 
-      heartReadings = data || [];
-      selectedCalendarDate = localDateKey(new Date());
-      calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-      renderCalendar();
+      if (!data || data.length === 0) {
+        container.innerHTML =
+          '<p class="empty">Todavía no hay mediciones registradas.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(reading => {
+        const lpm = Number(reading.lpm);
+        const fecha = reading.recorded_at
+          ? new Date(reading.recorded_at).toLocaleString()
+          : 'Fecha no disponible';
+
+        return `
+          <div class="record-item">
+            <div class="record-info">
+              <strong>${Number.isFinite(lpm) ? lpm : '--'} LPM</strong>
+              <small>${escapeHTML(fecha)}</small>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
-
-    $('#prevMonth')?.addEventListener('click', () => {
-      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1);
-      selectedCalendarDate = localDateKey(calendarMonth);
-      renderCalendar();
-    });
-
-    $('#nextMonth')?.addEventListener('click', () => {
-      calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1);
-      selectedCalendarDate = localDateKey(calendarMonth);
-      renderCalendar();
-    });
-
-    $('#calendarGrid')?.addEventListener('click', event => {
-      const button = event.target.closest('[data-calendar-date]');
-      if (!button) return;
-      selectedCalendarDate = button.dataset.calendarDate;
-      renderCalendar();
-    });
 
     // Carga del panel desde las tablas de Supabase
 
