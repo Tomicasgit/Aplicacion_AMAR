@@ -200,8 +200,7 @@
 
     previousLevel = result.level;
 
-    // Solo iniciar al entrar en estado crítico.
-    // No reiniciar el temporizador por cada paquete BLE.
+    // Iniciar una sola vez al entrar en estado crítico.
     if (
       result.level === "critical" &&
       previous !== "critical"
@@ -209,14 +208,12 @@
       startAutomaticConfirmation(result);
     }
 
-    // Una lectura válida normal o de precaución cancela
-    // una confirmación automática todavía pendiente.
-if (
-  result.level === "normal" ||
-  result.level === "warning"
-) {
-  cancelAutomaticConfirmation(true);
-}
+    // Cancelar si la lectura deja de ser crítica,
+    // incluida una lectura inválida.
+    if (result.level !== "critical") {
+      cancelAutomaticConfirmation(true);
+    }
+
     return {
       ...result,
       changed: result.level !== previous,
@@ -225,7 +222,7 @@ if (
   }
 
   // =========================================================
-  // CANCELACIÓN DEL TEMPORIZADOR
+  // CANCELACIÓN DEL TEMPORIZADOR AUTOMÁTICO
   // =========================================================
 
   function cancelAutomaticConfirmation(closeWindow = true) {
@@ -239,8 +236,6 @@ if (
     automaticConfirmationActive = false;
     automaticSeconds = 10;
 
-    // Cerrar únicamente el modal que pertenece
-    // a la confirmación automática.
     if (
       closeWindow &&
       wasActive &&
@@ -273,47 +268,49 @@ if (
     automaticSeconds = 10;
 
     openModal(`
-      <h2>Posible anomalía detectada</h2>
+      <div class="sos-confirmation">
+        <h2>Posible anomalía detectada</h2>
 
-      <p>
-        El dispositivo informó una lectura crítica válida.
-      </p>
+        <p>
+          El dispositivo informó una lectura crítica válida.
+        </p>
 
-      <p>
-        Si necesitás ayuda, confirmá ahora.
-        Si no respondés, se registrará una alerta automáticamente.
-      </p>
+        <p>
+          Si necesitás ayuda, confirmá ahora.
+          Si no respondés, se registrará una alerta automáticamente.
+        </p>
 
-      <p>
-        Lectura informada:
-        <strong>${result.lpm} LPM</strong>
-      </p>
+        <p>
+          Lectura informada:
+          <strong>${result.lpm} LPM</strong>
+        </p>
 
-      <p>
-        Tiempo restante:
-        <strong id="automaticCountdown">10 segundos</strong>
-      </p>
+        <p class="sos-countdown">
+          Tiempo restante:
+          <strong id="automaticCountdown">10 segundos</strong>
+        </p>
 
-      <button
-        type="button"
-        class="primary"
-        id="confirmAutoAlert"
-      >
-        Solicitar ayuda ahora
-      </button>
+        <button
+          type="button"
+          class="primary"
+          id="confirmAutoAlert"
+        >
+          Solicitar ayuda ahora
+        </button>
 
-      <button
-        type="button"
-        class="secondary"
-        id="cancelAutoAlert"
-      >
-        Cancelar alerta
-      </button>
+        <button
+          type="button"
+          class="secondary"
+          id="cancelAutoAlert"
+        >
+          Cancelar alerta
+        </button>
 
-      <p class="empty">
-        Esta función registra la alerta e intenta guardar
-        la ubicación. No envía mensajes ni realiza llamadas.
-      </p>
+        <p class="sos-disclaimer">
+          Esta función registra la alerta e intenta guardar
+          la ubicación. No envía mensajes ni realiza llamadas.
+        </p>
+      </div>
     `);
 
     document
@@ -460,7 +457,7 @@ if (
   }
 
   // =========================================================
-  // SOS MANUAL: SIN ESPERAR LOS 10 SEGUNDOS
+  // SOS MANUAL: REGISTRO DESPUÉS DE CONFIRMAR
   // =========================================================
 
   async function requestManualSOS() {
@@ -468,15 +465,24 @@ if (
       return;
     }
 
-    // Detener una cuenta regresiva pendiente.
     cancelAutomaticConfirmation(true);
-
     automaticRequestInProgress = true;
 
     const button = document.querySelector("#manualSOS");
 
     if (button) {
       button.disabled = true;
+    }
+
+    if (typeof openModal === "function") {
+      openModal(`
+        <div class="sos-confirmation">
+          <h2>Registrando solicitud SOS</h2>
+          <p>
+            Guardando la solicitud e intentando obtener tu ubicación.
+          </p>
+        </div>
+      `);
     }
 
     try {
@@ -486,8 +492,7 @@ if (
       });
 
       let locationSaved = false;
-      let locationMessage =
-        "No se pudo guardar la ubicación.";
+      let locationMessage = "No se pudo guardar la ubicación.";
 
       try {
         await captureAndSaveLocation();
@@ -505,37 +510,38 @@ if (
 
       if (typeof openModal === "function") {
         openModal(`
-          <h2>Solicitud SOS registrada</h2>
+          <div class="sos-confirmation">
+            <h2>Solicitud SOS registrada</h2>
 
-          <p>
-            La solicitud manual quedó registrada en A.M.A.R.
-          </p>
+            <p>
+              La solicitud manual quedó registrada en A.M.A.R.
+            </p>
 
-          <p>
-            ${
-              locationSaved
-                ? "Ubicación guardada correctamente."
-                : "No se guardó la ubicación: " +
-                  (typeof escapeHTML === "function"
-                    ? escapeHTML(locationMessage)
-                    : "ubicación no disponible")
-            }
-          </p>
+            <p>
+              ${
+                locationSaved
+                  ? "Ubicación guardada correctamente."
+                  : "No se guardó la ubicación: " +
+                    (typeof escapeHTML === "function"
+                      ? escapeHTML(locationMessage)
+                      : "ubicación no disponible")
+              }
+            </p>
 
-          <p>
-            <strong>
-              Esta acción no realiza llamadas ni envía
-              mensajes a tus contactos.
-            </strong>
-          </p>
+            <p class="sos-disclaimer">
+              Esta acción no realiza llamadas ni envía mensajes
+              a tus contactos. Si necesitás asistencia inmediata,
+              contactá directamente a los servicios de emergencia.
+            </p>
 
-          <button
-            type="button"
-            class="primary"
-            onclick="closeModal()"
-          >
-            Entendido
-          </button>
+            <button
+              type="button"
+              class="primary"
+              onclick="closeModal()"
+            >
+              Entendido
+            </button>
+          </div>
         `);
       }
 
@@ -576,7 +582,7 @@ if (
   }
 
   // =========================================================
-  // INICIALIZACIÓN DEL BOTÓN SOS
+  // SOS MANUAL: VENTANA DE CONFIRMACIÓN DE 10 SEGUNDOS
   // =========================================================
 
   function initializeManualSOS() {
@@ -591,10 +597,135 @@ if (
 
     button.dataset.initialized = "true";
 
-    button.addEventListener(
-      "click",
-      requestManualSOS
-    );
+    button.addEventListener("click", () => {
+      if (automaticRequestInProgress) {
+        return;
+      }
+
+      // Evitar que la confirmación manual se superponga
+      // con una confirmación automática activa.
+      if (automaticConfirmationActive) {
+        return;
+      }
+
+      if (typeof openModal !== "function") {
+        console.error(
+          "No está disponible la ventana de confirmación."
+        );
+        return;
+      }
+
+      let seconds = 10;
+      let timer = null;
+      let finished = false;
+
+      openModal(`
+        <div class="sos-confirmation">
+          <div class="sos-confirmation-icon" aria-hidden="true">!</div>
+
+          <h2>¿Necesitás ayuda?</h2>
+
+          <p>
+            Estás por realizar una solicitud de emergencia.
+            Confirmá únicamente si realmente necesitás ayuda.
+          </p>
+
+          <p class="sos-countdown">
+            Tiempo para confirmar:
+            <strong id="manualSOSCountdown">10</strong> s
+          </p>
+
+          <button
+            type="button"
+            class="sos-confirm-button"
+            id="confirmManualSOS"
+          >
+            Confirmar SOS
+          </button>
+
+          <button
+            type="button"
+            class="secondary"
+            id="cancelManualSOS"
+          >
+            Cancelar
+          </button>
+
+          <p class="sos-disclaimer">
+            Si confirmás, se registrará la alerta y se intentará
+            guardar tu ubicación. Si cancelás o termina el contador,
+            no se registrará esta solicitud manual.
+            A.M.A.R. actualmente no envía mensajes ni realiza
+            llamadas automáticamente.
+          </p>
+        </div>
+      `);
+
+      const countdown = document.querySelector(
+        "#manualSOSCountdown"
+      );
+
+      const confirmButton = document.querySelector(
+        "#confirmManualSOS"
+      );
+
+      const cancelButton = document.querySelector(
+        "#cancelManualSOS"
+      );
+
+      function stopCountdown() {
+        if (timer !== null) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function finishConfirmation() {
+        if (finished) {
+          return false;
+        }
+
+        finished = true;
+        stopCountdown();
+
+        return true;
+      }
+
+      cancelButton?.addEventListener("click", () => {
+        if (!finishConfirmation()) {
+          return;
+        }
+
+        closeModal();
+      });
+
+      confirmButton?.addEventListener("click", () => {
+        if (!finishConfirmation()) {
+          return;
+        }
+
+        closeModal();
+        requestManualSOS();
+      });
+
+      timer = setInterval(() => {
+        if (finished) {
+          stopCountdown();
+          return;
+        }
+
+        seconds -= 1;
+
+        if (countdown) {
+          countdown.textContent = String(seconds);
+        }
+
+        if (seconds <= 0) {
+          finishConfirmation();
+          closeModal();
+        }
+      }, 1000);
+    });
   }
 
   if (document.readyState === "loading") {
