@@ -58,6 +58,60 @@ let heartReadings = [];
       `;
     }
 
+    function renderWeeklySummary() {
+      const container = $('#weeklySummary');
+      if (!container) return;
+
+      const today = new Date();
+      const monday = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+
+      const weekday = (monday.getDay() + 6) % 7;
+      monday.setDate(monday.getDate() - weekday);
+
+      const sunday = new Date(monday);
+      sunday.setDate(sunday.getDate() + 7);
+
+      const rows = heartReadings.filter(reading => {
+        const date = new Date(reading.recorded_at);
+        return !Number.isNaN(date.getTime()) &&
+          date >= monday && date < sunday;
+      });
+
+      const values = rows
+        .map(reading => Number(reading.lpm))
+        .filter(value => Number.isFinite(value) && value > 0);
+
+      const average = values.length
+        ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+        : null;
+      const minimum = values.length ? Math.min(...values) : null;
+      const maximum = values.length ? Math.max(...values) : null;
+
+      container.innerHTML = `
+        <div class="calendar-stat">
+          <small>Lecturas de la semana</small>
+          <strong>${rows.length}</strong>
+        </div>
+        <div class="calendar-stat">
+          <small>Promedio semanal</small>
+          <strong>${average === null ? '—' : average + ' LPM'}</strong>
+        </div>
+        <div class="calendar-stat">
+          <small>Mínimo semanal</small>
+          <strong>${minimum === null ? '—' : minimum + ' LPM'}</strong>
+        </div>
+        <div class="calendar-stat">
+          <small>Máximo semanal</small>
+          <strong>${maximum === null ? '—' : maximum + ' LPM'}</strong>
+        </div>
+        ${rows.length ? '' : '<p class="empty">Todavía no hay mediciones registradas esta semana.</p>'}
+      `;
+    }
+
     function renderMonthlySummary() {
       const el = $('#calendarSummary');
       if (!el) return;
@@ -153,6 +207,7 @@ let heartReadings = [];
       }
 
       grid.innerHTML = html;
+      renderWeeklySummary();
       renderMonthlySummary();
       renderSelectedDay();
     }
