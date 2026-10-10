@@ -211,13 +211,12 @@
 
     // Una lectura válida normal o de precaución cancela
     // una confirmación automática todavía pendiente.
-    if (
-      result.level === "normal" ||
-      result.level === "warning"
-    ) {
-      cancelAutomaticConfirmation(true);
-    }
-
+if (
+  result.level === "normal" ||
+  result.level === "warning"
+) {
+  cancelAutomaticConfirmation(true);
+}
     return {
       ...result,
       changed: result.level !== previous,
