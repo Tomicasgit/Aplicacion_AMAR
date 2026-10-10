@@ -551,7 +551,16 @@
       window.AMAR_SUPABASE_KEY
     );
 
+    const API = 'api/index.php?action=';
+    let token = localStorage.getItem('amar_token');
+    const isFileProtocol = window.location.protocol === 'file:';
+
     const $ = s => document.querySelector(s);
+
+    if (isFileProtocol) {
+      $('#fileNoticeLogin').style.display = 'block';
+      $('#fileNoticeRegister').style.display = 'block';
+    }
 
     function show(id) {
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
@@ -561,6 +570,78 @@
       const el = $(id);
       el.textContent = text;
       el.className = isSuccess ? 'message success' : 'message';
+    }
+
+    // Mock local para cuando se abre directamente como archivo file:// sin servidor web
+    function handleLocalMock(action, method, body) {
+      let mockUsers = JSON.parse(localStorage.getItem('amar_mock_users') || '[]');
+      let currentUser = JSON.parse(localStorage.getItem('amar_mock_current') || 'null');
+
+      if (action === 'register') {
+        const email = (body.email || '').trim().toLowerCase();
+        if (mockUsers.some(u => u.email === email)) {
+          return { ok: false, error: 'Ese correo ya está registrado.' };
+        }
+        const newUser = { id: Date.now(), name: body.name || 'Paciente', email, password: body.password };
+        mockUsers.push(newUser);
+        localStorage.setItem('amar_mock_users', JSON.stringify(mockUsers));
+        const mockToken = 'mock_' + Date.now();
+        localStorage.setItem('amar_mock_current', JSON.stringify(newUser));
+        return { ok: true, token: mockToken, user: newUser };
+      }
+
+      if (action === 'login') {
+        const email = (body.email || '').trim().toLowerCase();
+        const user = mockUsers.find(u => u.email === email && u.password === body.password);
+        if (!user) {
+          return { ok: false, error: 'Correo o contraseña incorrectos.' };
+        }
+        const mockToken = 'mock_' + Date.now();
+        localStorage.setItem('amar_mock_current', JSON.stringify(user));
+        return { ok: true, token: mockToken, user };
+      }
+
+      if (action === 'dashboard') {
+        return {
+          ok: true,
+          patient: currentUser || { name: 'Paciente', email: 'correo@ejemplo.com' },
+          last_reading: null,
+          device: null,
+          last_alert: null,
+          last_location: null,
+          contacts_count: 0
+        };
+      }
+
+      return { ok: true };
+    }
+
+    async function request(action, method = 'GET', body) {
+      // Si estamos en protocolo file:// usamos el almacenamiento local para que no falle al hacer doble clic
+      if (isFileProtocol) {
+        const mockRes = handleLocalMock(action, method, body);
+        if (!mockRes.ok) throw new Error(mockRes.error || 'Error en la solicitud local.');
+        return mockRes;
+      }
+
+      try {
+        const r = await fetch(API + action, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: 'Bearer ' + token } : {})
+          },
+          body: body ? JSON.stringify(body) : undefined
+        });
+        const data = await r.json().catch(() => ({ ok: false, error: 'Respuesta inválida del servidor.' }));
+        if (!r.ok || !data.ok) throw new Error(data.error || 'No se pudo completar la solicitud.');
+        return data;
+      } catch (err) {
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+          throw new Error('No se pudo conectar con el servidor. Verificá que esté ejecutándose: php -S localhost:8000');
+        }
+        throw err;
+      }
     }
 
     function openModal(html) {
@@ -766,6 +847,10 @@
         message('#loginMessage', error.message);
         return;
       }
+
+      token = null;
+      localStorage.removeItem('amar_token');
+      localStorage.removeItem('amar_mock_current');
 
       message('#loginMessage', 'Sesión cerrada correctamente.', true);
       show('loginView');

@@ -543,15 +543,17 @@
     <div class="modal-card" id="modalContent"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
   <script>
-    const supabaseClient = window.supabase.createClient(
-      window.AMAR_SUPABASE_URL,
-      window.AMAR_SUPABASE_KEY
-    );
+    const API = 'api/index.php?action=';
+    let token = localStorage.getItem('amar_token');
+    const isFileProtocol = window.location.protocol === 'file:';
 
     const $ = s => document.querySelector(s);
+
+    if (isFileProtocol) {
+      $('#fileNoticeLogin').style.display = 'block';
+      $('#fileNoticeRegister').style.display = 'block';
+    }
 
     function show(id) {
       document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
@@ -561,6 +563,78 @@
       const el = $(id);
       el.textContent = text;
       el.className = isSuccess ? 'message success' : 'message';
+    }
+
+    // Mock local para cuando se abre directamente como archivo file:// sin servidor web
+    function handleLocalMock(action, method, body) {
+      let mockUsers = JSON.parse(localStorage.getItem('amar_mock_users') || '[]');
+      let currentUser = JSON.parse(localStorage.getItem('amar_mock_current') || 'null');
+
+      if (action === 'register') {
+        const email = (body.email || '').trim().toLowerCase();
+        if (mockUsers.some(u => u.email === email)) {
+          return { ok: false, error: 'Ese correo ya está registrado.' };
+        }
+        const newUser = { id: Date.now(), name: body.name || 'Paciente', email, password: body.password };
+        mockUsers.push(newUser);
+        localStorage.setItem('amar_mock_users', JSON.stringify(mockUsers));
+        const mockToken = 'mock_' + Date.now();
+        localStorage.setItem('amar_mock_current', JSON.stringify(newUser));
+        return { ok: true, token: mockToken, user: newUser };
+      }
+
+      if (action === 'login') {
+        const email = (body.email || '').trim().toLowerCase();
+        const user = mockUsers.find(u => u.email === email && u.password === body.password);
+        if (!user) {
+          return { ok: false, error: 'Correo o contraseña incorrectos.' };
+        }
+        const mockToken = 'mock_' + Date.now();
+        localStorage.setItem('amar_mock_current', JSON.stringify(user));
+        return { ok: true, token: mockToken, user };
+      }
+
+      if (action === 'dashboard') {
+        return {
+          ok: true,
+          patient: currentUser || { name: 'Paciente', email: 'correo@ejemplo.com' },
+          last_reading: null,
+          device: null,
+          last_alert: null,
+          last_location: null,
+          contacts_count: 0
+        };
+      }
+
+      return { ok: true };
+    }
+
+    async function request(action, method = 'GET', body) {
+      // Si estamos en protocolo file:// usamos el almacenamiento local para que no falle al hacer doble clic
+      if (isFileProtocol) {
+        const mockRes = handleLocalMock(action, method, body);
+        if (!mockRes.ok) throw new Error(mockRes.error || 'Error en la solicitud local.');
+        return mockRes;
+      }
+
+      try {
+        const r = await fetch(API + action, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: 'Bearer ' + token } : {})
+          },
+          body: body ? JSON.stringify(body) : undefined
+        });
+        const data = await r.json().catch(() => ({ ok: false, error: 'Respuesta inválida del servidor.' }));
+        if (!r.ok || !data.ok) throw new Error(data.error || 'No se pudo completar la solicitud.');
+        return data;
+      } catch (err) {
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+          throw new Error('No se pudo conectar con el servidor. Verificá que esté ejecutándose: php -S localhost:8000');
+        }
+        throw err;
+      }
     }
 
     function openModal(html) {
@@ -582,191 +656,90 @@
       };
     });
 
-    // Formulario de inicio de sesión con Supabase
+    // Formulario de inicio de sesión
     $('#loginForm').onsubmit = async e => {
       e.preventDefault();
       message('#loginMessage', '');
-
       const btn = $('#loginBtn');
       btn.disabled = true;
       btn.textContent = 'Ingresando...';
 
       try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: $('#loginEmail').value.trim(),
+        const d = await request('login', 'POST', {
+          email: $('#loginEmail').value,
           password: $('#loginPassword').value
         });
-
-        if (error) throw error;
-
-        message('#loginMessage', 'Ingreso correcto. Cargando panel...', true);
-        await loadDashboard(data.user);
+        token = d.token;
+        localStorage.setItem('amar_token', token);
+        message('#loginMessage', '¡Ingreso correcto! Cargando...', true);
+        await loadDashboard();
       } catch (err) {
-        message('#loginMessage', err.message || 'No se pudo iniciar sesión.');
+        message('#loginMessage', err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Ingresar';
       }
     };
 
-    // Formulario de registro con Supabase
+    // Formulario de creación de cuenta (registro)
     $('#registerForm').onsubmit = async e => {
       e.preventDefault();
       message('#registerMessage', '');
-
       const btn = $('#registerBtn');
       btn.disabled = true;
       btn.textContent = 'Creando cuenta...';
 
-      const email = $('#registerEmail').value.trim();
-      const name = $('#name').value.trim();
-      const password = $('#registerPassword').value;
+      const emailVal = $('#registerEmail').value;
 
       try {
-        const { data, error } = await supabaseClient.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name }
-          }
+        const d = await request('register', 'POST', {
+          name: $('#name').value,
+          email: emailVal,
+          password: $('#registerPassword').value
         });
-
-        if (error) throw error;
-
-        $('#loginEmail').value = email;
-
-        if (data.session && data.user) {
-          message('#registerMessage', 'Cuenta creada correctamente. Cargando panel...', true);
-          await loadDashboard(data.user);
-        } else {
-          message(
-            '#registerMessage',
-            'Cuenta creada. Iniciá sesión con tu correo y contraseña.',
-            true
-          );
-          show('loginView');
-          message('#loginMessage', 'Ya podés ingresar con tu cuenta.', true);
-        }
+        token = d.token;
+        localStorage.setItem('amar_token', token);
+        message('#registerMessage', '¡Cuenta creada con éxito! Ingresando al panel...', true);
+        $('#loginEmail').value = emailVal;
+        setTimeout(() => {
+          loadDashboard();
+        }, 500);
       } catch (err) {
-        message('#registerMessage', err.message || 'No se pudo crear la cuenta.');
+        message('#registerMessage', err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Crear cuenta';
       }
     };
 
-    // Carga del panel desde las tablas de Supabase
-    async function loadDashboard(user = null) {
+    // Carga de panel
+    async function loadDashboard() {
       try {
-        if (!user) {
-          const { data, error } = await supabaseClient.auth.getUser();
-          if (error) throw error;
-          user = data.user;
-        }
-
-        if (!user) {
-          show('loginView');
-          return;
-        }
-
-        const results = await Promise.all([
-          supabaseClient
-            .from('profiles')
-            .select('name')
-            .eq('id', user.id)
-            .maybeSingle(),
-
-          supabaseClient
-            .from('heart_readings')
-            .select('lpm, recorded_at')
-            .eq('user_id', user.id)
-            .order('recorded_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-
-          supabaseClient
-            .from('devices')
-            .select('name, status, last_seen_at')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-
-          supabaseClient
-            .from('emergency_contacts')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id),
-
-          supabaseClient
-            .from('alerts')
-            .select('type, message, created_at')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-
-          supabaseClient
-            .from('locations')
-            .select('latitude, longitude, recorded_at')
-            .eq('user_id', user.id)
-            .order('recorded_at', { ascending: false })
-            .limit(1)
-            .maybeSingle()
-        ]);
-
-        for (const result of results) {
-          if (result.error) throw result.error;
-        }
-
-        const [profile, reading, device, contacts, alertData, locationData] =
-          results.map(result => result.data);
-
-        $('#patientName').textContent =
-          profile?.name || user.user_metadata?.name || 'Paciente';
-
-        $('#bpm').textContent = reading?.lpm ?? '--';
-        $('#readingTime').textContent = reading?.recorded_at
-          ? new Date(reading.recorded_at).toLocaleString()
-          : 'Sin datos';
-
-        $('#contactsCount').textContent = results[3].count ?? 0;
-
-        $('#deviceBadge').textContent = device
-          ? `${device.name}: ${device.status}`
-          : 'Sin dispositivo';
-
-        $('#heartState').textContent = reading
-          ? 'Última lectura recibida'
-          : 'Esperando lecturas del dispositivo';
-
-        $('#location').textContent = locationData
-          ? `${locationData.latitude}, ${locationData.longitude} — ${new Date(locationData.recorded_at).toLocaleString()}`
+        const d = await request('dashboard');
+        $('#patientName').textContent = d.patient?.name || 'Paciente';
+        $('#bpm').textContent = d.last_reading?.bpm ?? '--';
+        $('#readingTime').textContent = d.last_reading ? new Date(d.last_reading.recorded_at).toLocaleString() : 'Sin datos';
+        $('#contactsCount').textContent = d.contacts_count ?? 0;
+        $('#deviceBadge').textContent = d.device ? `${d.device.name}: ${d.device.status}` : 'Sin dispositivo';
+        $('#heartState').textContent = d.last_reading ? '● Última lectura recibida' : 'Esperando lecturas del dispositivo';
+        $('#location').innerHTML = d.last_location
+          ? `📍 ${d.last_location.latitude}, ${d.last_location.longitude}<br><small>${new Date(d.last_location.recorded_at).toLocaleString()}</small>`
           : 'Todavía no se recibió una ubicación.';
-
-        $('#alert').textContent = alertData
-          ? `${alertData.type}: ${alertData.message || 'Sin descripción'}`
-          : 'No hay alertas registradas.';
-
+        $('#alert').textContent = d.last_alert ? `${d.last_alert.type}: ${d.last_alert.message}` : 'No hay alertas registradas.';
         show('appView');
       } catch (err) {
-        console.error('Error al cargar el panel:', err);
-        message(
-          '#loginMessage',
-          'No se pudo cargar el panel: ' + (err.message || 'Error desconocido.')
-        );
+        localStorage.removeItem('amar_token');
+        token = null;
+        message('#loginMessage', err.message);
         show('loginView');
       }
     }
 
-    // Cerrar sesión en Supabase
-    $('#logout').onclick = async () => {
-      const { error } = await supabaseClient.auth.signOut();
-
-      if (error) {
-        message('#loginMessage', error.message);
-        return;
-      }
-
+    // Cerrar sesión
+    $('#logout').onclick = () => {
+      localStorage.removeItem('amar_token');
+      localStorage.removeItem('amar_mock_current');
+      token = null;
       message('#loginMessage', 'Sesión cerrada correctamente.', true);
       show('loginView');
     };
@@ -774,7 +747,7 @@
     // Modal para vincular ESP32
     $('#addDevice').onclick = () => openModal(`
       <h2>Vincular ESP32</h2>
-      <p>Registrá el dispositivo en tu cuenta. La conexión con el ESP32 se integrará mediante Bluetooth desde el navegador.</p>
+      <p>Creá una clave para cargar en el firmware del ESP32.</p>
       <form id="deviceForm">
         <div class="field">
           <label>Nombre del dispositivo</label>
@@ -806,107 +779,41 @@
       </form>
     `);
 
-    // Formularios de contactos y dispositivos mediante Supabase
     document.addEventListener('submit', async e => {
-      if (e.target.id !== 'deviceForm' && e.target.id !== 'contactForm') {
-        return;
-      }
-
-      e.preventDefault();
-
-      const form = e.target;
-      const submitButton = form.querySelector('button[type="submit"], button:not([type])');
-
-      if (submitButton) {
-        submitButton.disabled = true;
-      }
-
-      try {
-        const { data: authData, error: authError } =
-          await supabaseClient.auth.getUser();
-
-        if (authError) throw authError;
-        if (!authData.user) throw new Error('Tu sesión expiró. Iniciá sesión nuevamente.');
-
-        const userId = authData.user.id;
-
-        if (form.id === 'deviceForm') {
-          const name = $('#deviceName').value.trim();
-
-          if (!name) throw new Error('Ingresá un nombre para el dispositivo.');
-
-          const { data, error } = await supabaseClient
-            .from('devices')
-            .insert({
-              user_id: userId,
-              name,
-              status: 'offline'
-            })
-            .select('id, name, status')
-            .single();
-
-          if (error) throw error;
-
+      if (e.target.id === 'deviceForm') {
+        e.preventDefault();
+        try {
+          const d = await request('devices', 'POST', { name: $('#deviceName').value });
           openModal(`
-            <h2>Dispositivo registrado</h2>
-            <p><strong>${data.name.replace(/[&<>"']/g, c => ({
-              '&': '&amp;', '<': '&lt;', '>': '&gt;',
-              '"': '&quot;', "'": '&#39;'
-            }[c]))}</strong> quedó asociado a tu cuenta.</p>
-            <p>Estado inicial: sin conexión.</p>
-            <p>La vinculación Bluetooth se implementará en el siguiente paso.</p>
+            <h2>Clave creada</h2>
+            <p>Copiala ahora: por seguridad no vuelve a mostrarse.</p>
+            <p class="device-key">${d.device?.device_key || 'CLAVE-DEMO'}</p>
             <button class="primary" onclick="closeModal();loadDashboard()">Entendido</button>
           `);
+        } catch (err) {
+          alert(err.message);
         }
-
-        if (form.id === 'contactForm') {
-          const name = $('#contactName').value.trim();
-          const phone = $('#contactPhone').value.trim();
-          const relationship = $('#contactRelation').value.trim();
-
-          if (!name || !phone) {
-            throw new Error('Completá el nombre y el teléfono del contacto.');
-          }
-
-          const { error } = await supabaseClient
-            .from('emergency_contacts')
-            .insert({
-              user_id: userId,
-              name,
-              phone,
-              relationship: relationship || null
-            });
-
-          if (error) throw error;
-
+      }
+      if (e.target.id === 'contactForm') {
+        e.preventDefault();
+        try {
+          await request('contacts', 'POST', {
+            name: $('#contactName').value,
+            phone: $('#contactPhone').value,
+            relationship: $('#contactRelation').value
+          });
           closeModal();
-          await loadDashboard();
-        }
-      } catch (err) {
-        alert(err.message || 'No se pudo guardar la información.');
-      } finally {
-        if (submitButton && submitButton.isConnected) {
-          submitButton.disabled = false;
+          loadDashboard();
+        } catch (err) {
+          alert(err.message);
         }
       }
     });
 
-    // Restaurar la sesión guardada por Supabase al abrir la página
-    (async () => {
-      const { data, error } = await supabaseClient.auth.getSession();
-
-      if (error) {
-        console.error('Error al recuperar la sesión:', error);
-        show('loginView');
-        return;
-      }
-
-      if (data.session) {
-        await loadDashboard(data.session.user);
-      } else {
-        show('loginView');
-      }
-    })();
+    // Si ya había una sesión iniciada al abrir la página, cargar panel
+    if (token) {
+      loadDashboard();
+    }
   </script>
 </body>
 </html>
