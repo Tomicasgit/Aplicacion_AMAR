@@ -589,7 +589,15 @@
           <small>Última lectura</small>
           <b id="readingTime">Sin datos</b>
         </article>
-        <article class="card metric">
+       
+<article class="card wide">
+  <h3>Historial de frecuencia cardíaca</h3>
+  <div id="historyList" class="record-list">
+    <p class="empty">Cargando historial...</p>
+  </div>
+</article>
+
+	 <article class="card metric">
           <small>Contactos de emergencia</small>
           <b id="contactsCount">0</b>
         </article>
@@ -1074,6 +1082,52 @@ async function editProfile() {
       }
     }
 
+    // Cargar las últimas 20 mediciones del usuario
+    async function loadHeartHistory(userId) {
+      const container = $('#historyList');
+
+      if (!container) return;
+
+      container.innerHTML =
+        '<p class="empty">Cargando historial...</p>';
+
+      const { data, error } = await supabaseClient
+        .from('heart_readings')
+        .select('lpm, recorded_at')
+        .eq('user_id', userId)
+        .order('recorded_at', { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error('Error al cargar el historial:', error);
+        container.innerHTML =
+          '<p class="empty">No se pudo cargar el historial.</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML =
+          '<p class="empty">Todavía no hay mediciones registradas.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(reading => {
+        const lpm = Number(reading.lpm);
+        const fecha = reading.recorded_at
+          ? new Date(reading.recorded_at).toLocaleString()
+          : 'Fecha no disponible';
+
+        return `
+          <div class="record-item">
+            <div class="record-info">
+              <strong>${Number.isFinite(lpm) ? lpm : '--'} LPM</strong>
+              <small>${escapeHTML(fecha)}</small>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     // Carga del panel desde las tablas de Supabase
 
     async function loadDashboard(user = null) {
@@ -1092,7 +1146,8 @@ async function editProfile() {
         // Cargar las listas completas del usuario autenticado
         await Promise.all([
           loadDevices(user.id),
-          loadContacts(user.id)
+          loadContacts(user.id),
+          loadHeartHistory(user.id)
         ]);
 
         const results = await Promise.all([
