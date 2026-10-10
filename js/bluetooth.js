@@ -106,6 +106,21 @@
       const json = new TextDecoder().decode(bytes);
       const data = JSON.parse(json);
 
+      if (window.AMARAlerts?.processReading) {
+        const resultado = window.AMARAlerts.processReading(data);
+
+        if (
+          resultado.changed &&
+          (resultado.level === "critical" || resultado.level === "warning")
+        ) {
+          console.info(
+            "A.M.A.R.: cambio de estado detectado.",
+            resultado.level,
+            resultado.reason
+          );
+        }
+      }
+
       updateReading(data);
       await saveReading(data);
     } catch (error) {

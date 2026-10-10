@@ -729,3 +729,24 @@
       cursor: pointer;
     }
 \n
+
+/* Botón SOS manual de A.M.A.R. */
+.sos-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+
+.sos-button:hover {
+  background: var(--red2);
+}
+
+.sos-button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
