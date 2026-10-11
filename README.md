@@ -53,6 +53,9 @@ Los documentos están numerados para facilitar su lectura en orden. Las afirmaci
 | 17 | [Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) | Constantes, pines, funciones, algoritmo de LPM y ciclo de ejecución. |
 | 18 | [Manual de usuario](docs/18-MANUAL-DE-USUARIO.md) | Cómo acceder, conectar, leer, consultar historial, contactos y SOS. |
 | 19 | [Manual de mantenimiento](docs/19-MANUAL-DE-MANTENIMIENTO.md) | Diagnóstico por capas, publicación, recuperación y evidencia. |
+| 20 | [HTML, CSS y componentes](docs/20-HTML-CSS-Y-COMPONENTES.md) | Identificadores del HTML, cascada CSS, componentes y variables de diseño. |
+| 21 | [Memoria descriptiva académica](docs/21-MEMORIA-DESCRIPTIVA-PARA-PRESENTACION.md) | Resumen no técnico, objetivos, metodología, evaluación y trabajo futuro. |
+| — | [Índice de la carpeta docs](docs/README.md) | Navegación dentro de la documentación. |
 | — | [Referencia rápida de colores](README-PALETA.md) | Paleta visual resumida. |
 
 ## 3. Cómo funciona el sistema
