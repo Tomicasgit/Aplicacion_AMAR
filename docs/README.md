@@ -25,6 +25,8 @@ La documentación completa se encuentra en el [README principal](../README.md).
 19. [Manual de mantenimiento](19-MANUAL-DE-MANTENIMIENTO.md)
 20. [HTML, CSS y componentes](20-HTML-CSS-Y-COMPONENTES.md)
 21. [Memoria descriptiva académica](21-MEMORIA-DESCRIPTIVA-PARA-PRESENTACION.md)
+22. [Requisitos funcionales y no funcionales](22-REQUISITOS-FUNCIONALES-Y-NO-FUNCIONALES.md)
+23. [Pendientes y deuda técnica](23-PENDIENTES-Y-DEUDA-TECNICA.md)
 
 ## Nota sobre exactitud
 
