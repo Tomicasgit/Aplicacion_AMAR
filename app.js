@@ -8,7 +8,7 @@
       }
 
       message('#loginMessage', 'Sesión cerrada correctamente.', true);
-      show('loginView');
+      show('welcomeView');
     };
 
     // Modal para vincular ESP32 por Bluetooth
@@ -131,13 +131,13 @@
 
       if (error) {
         console.error('Error al recuperar la sesión:', error);
-        show('loginView');
+        show('welcomeView');
         return;
       }
 
       if (data.session) {
         await loadDashboard(data.session.user);
       } else {
-        show('loginView');
+        show('welcomeView');
       }
     })();

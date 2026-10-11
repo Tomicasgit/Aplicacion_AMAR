@@ -73,8 +73,8 @@
         const [profile, reading, device, contacts, alertData, locationData] =
           results.map(result => result.data);
 
-        $('#patientName').textContent =
-          profile?.name || user.user_metadata?.name || 'Paciente';
+        $('#patientName').textContent = profile?.name || user.user_metadata?.name || user.user_metadata?.full_name || 'Paciente';
+        if (typeof fillProfileForm === 'function') { currentProfileUser = user; fillProfileForm(user); }
 
         $('#bpm').textContent = reading?.lpm ?? '--';
         $('#readingTime').textContent = reading?.recorded_at
