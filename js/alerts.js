@@ -55,7 +55,7 @@
     return data;
   }
 
-  async function requestSOSFunction({ type, message }) {
+  async function requestSOSFunction({ type, message, location = null }) {
     await getCurrentUser();
 
     const { data, error } = await supabaseClient.functions.invoke(
@@ -63,7 +63,8 @@
       {
         body: {
           type,
-          message
+          message,
+          location
         }
       }
     );
@@ -135,18 +136,15 @@
         },
         {
           enableHighAccuracy: true,
-          timeout: 15000,
+          timeout: 5000,
           maximumAge: 0
         }
       );
     });
   }
 
-  async function captureAndSaveLocation({
-    deviceId = null
-  } = {}) {
+  async function savePosition(position, { deviceId = null } = {}) {
     const user = await getCurrentUser();
-    const position = await getCurrentPosition();
 
     const { data, error } = await supabaseClient
       .from("locations")
@@ -165,6 +163,11 @@
       location: data,
       accuracy: position.coords.accuracy
     };
+  }
+
+  async function captureAndSaveLocation(options = {}) {
+    const position = await getCurrentPosition();
+    return savePosition(position, options);
   }
 
 
@@ -540,23 +543,33 @@
     }
 
     try {
+      let position = null;
+      try {
+        position = await getCurrentPosition();
+      } catch (locationError) {
+        console.warn("No se pudo obtener la ubicación para el SOS:", locationError);
+      }
+
       const sosResult = await requestSOSFunction({
         type: "automatic_sos",
         message: reason === "timeout"
           ? "Alerta automática: terminó la cuenta regresiva sin respuesta."
-          : "Alerta automática: solicitud confirmada por el usuario."
+          : "Alerta automática: solicitud confirmada por el usuario.",
+        location: position ? {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        } : null
       });
 
       let locationSaved = false;
 
-      try {
-        await captureAndSaveLocation();
-        locationSaved = true;
-      } catch (error) {
-        console.warn(
-          "Alerta registrada; no se pudo guardar la ubicación:",
-          error
-        );
+      if (position) {
+        try {
+          await savePosition(position);
+          locationSaved = true;
+        } catch (error) {
+          console.warn("Alerta registrada; no se pudo guardar la ubicación:", error);
+        }
       }
 
       const contactsHTML = await buildEmergencyContactsHTML();
@@ -654,28 +667,37 @@
 
     try {
 
-const result = await requestSOSFunction({
-  type: "manual_sos",
-  message: "Solicitud manual de ayuda desde A.M.A.R."
-});
-
-const alert = result.alert;
-
-      let locationSaved = false;
-      let locationMessage = "No se pudo guardar la ubicación.";
+let position = null;
+      let locationMessage = "No se pudo obtener la ubicación.";
 
       try {
-        await captureAndSaveLocation();
-        locationSaved = true;
-        locationMessage = "Ubicación guardada.";
+        position = await getCurrentPosition();
       } catch (error) {
-        console.warn(
-          "SOS registrado; ubicación no disponible:",
-          error
-        );
+        console.warn("No se pudo obtener la ubicación para el SOS:", error);
+        locationMessage = error.message || locationMessage;
+      }
 
-        locationMessage =
-          error.message || locationMessage;
+      const result = await requestSOSFunction({
+        type: "manual_sos",
+        message: "Solicitud manual de ayuda desde A.M.A.R.",
+        location: position ? {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        } : null
+      });
+
+      const alert = result.alert;
+      let locationSaved = false;
+
+      if (position) {
+        try {
+          await savePosition(position);
+          locationSaved = true;
+          locationMessage = "Ubicación guardada.";
+        } catch (error) {
+          console.warn("SOS registrado; ubicación no disponible:", error);
+          locationMessage = error.message || "No se pudo guardar la ubicación.";
+        }
       }
 
       const contactsHTML = await buildEmergencyContactsHTML();
