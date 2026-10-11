@@ -1,6 +1,6 @@
-# A.M.A.R. Pulse — Paleta de colores
+# A.M.A.R. — Paleta de colores
 
-Esta guía define los colores oficiales de la interfaz web de A.M.A.R. (Alerta de Latidos y Monitoreo Autónomo). Los colores se implementan como variables CSS en `style.css`.
+Esta guía define los colores oficiales de la interfaz web de A.M.A.R. (Asistente de Monitoreo Autónomo de Ritmo). Los colores se implementan como variables CSS en `style.css`.
 
 > A.M.A.R. es un prototipo de monitoreo. Los colores de estado de la interfaz no constituyen una evaluación ni un diagnóstico médico.
 
