@@ -145,7 +145,7 @@ Deno.serve(async (req: Request) => {
       `Fecha: ${new Date(alert.created_at).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}`,
       "",
       "Esta notificación no confirma que el usuario esté recibiendo atención médica. Si corresponde, comunicate directamente con él.",
-    ].join("\\n");
+    ].join("\n");
 
     for (const contact of emailContacts) {
       try {
