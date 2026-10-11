@@ -1400,3 +1400,31 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .heartbeat-wave { animation: none; }
 }
+
+
+/* Acceso a WhatsApp en las acciones de contactos SOS */
+.record-actions .whatsapp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 9px 13px;
+  border: 1px solid #1f9d55;
+  border-radius: 9px;
+  background: #168447;
+  color: #fff;
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.record-actions .whatsapp-button:hover {
+  background: #116b39;
+}
+
+.record-actions .whatsapp-button:focus-visible {
+  outline: 3px solid #6ee7a0;
+  outline-offset: 3px;
+}
