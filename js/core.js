@@ -5,22 +5,45 @@ const supabaseClient = window.supabase.createClient(
 
     const $ = s => document.querySelector(s);
 
+    // Cambia de vista como una SPA: solo una vista principal queda activa.
     function show(id) {
-      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
+      document.querySelectorAll('.view').forEach(view => {
+        const active = view.id === id;
+        view.classList.toggle('active', active);
+        view.setAttribute('aria-hidden', String(!active));
+      });
     }
 
-    // Navegación interna entre Inicio e Historial.
+    // Navegación interna entre las secciones del panel.
     document.querySelectorAll('[data-panel]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.classList.contains('active')));
+
       button.addEventListener('click', () => {
         const target = button.dataset.panel;
 
         document.querySelectorAll('.dashboard-section').forEach(section => {
-          section.classList.toggle('active', section.id === target);
+          const active = section.id === target;
+          section.classList.toggle('active', active);
+          section.setAttribute('aria-hidden', String(!active));
         });
 
         document.querySelectorAll('.nav [data-panel]').forEach(item => {
-          item.classList.toggle('active', item === button);
+          const active = item === button;
+          item.classList.toggle('active', active);
+          item.setAttribute('aria-pressed', String(active));
         });
+
+        const title = document.querySelector('.top-heading h1');
+        const description = document.querySelector('.top-heading p');
+        if (title && description) {
+          const isHistory = target === 'historySection';
+          title.textContent = isHistory ? 'Seguimiento cardíaco' : 'Tu panel de salud';
+          description.textContent = isHistory
+            ? 'Revisá las mediciones guardadas y consultá tu evolución por fecha.'
+            : 'Consultá tus lecturas y el estado de tu dispositivo A.M.A.R.';
+        }
+
+        window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       });
     });
 
