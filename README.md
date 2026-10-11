@@ -21,6 +21,10 @@ Los módulos de `js/` separan las funciones de autenticación, perfiles, disposi
 
 La configuración pública del cliente Supabase se encuentra en `supabase-config.js`. Las claves secretas nunca deben incluirse en el código del navegador.
 
+## Identidad visual
+
+La interfaz utiliza la paleta **A.M.A.R. Pulse**, definida en `style.css`. La documentación de colores, códigos hexadecimales, usos y criterios de consistencia está en [`README-PALETA.md`](README-PALETA.md).
+
 ## Firmware
 
 `Completop.ino` contiene el firmware del dispositivo. El hardware y sus conexiones deben verificarse en el propio código antes de modificarlo.
