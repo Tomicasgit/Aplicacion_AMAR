@@ -14,6 +14,7 @@
   let readingPollTimer = null;
   let lastPayloadSignature = '';
   let lastTelemetryAt = 0;
+  let lastSavedReadingKey = '';
 
   function setConnectionStatus(text) {
     const badge = document.querySelector('#deviceBadge');
@@ -118,6 +119,11 @@
       return;
     }
 
+    // Evitar insertar varias veces el mismo paquete cuando coinciden notificación BLE y lectura de respaldo.
+    // Las lecturas cero, negativas, no enteras o fuera de rango se rechazan arriba.
+    const readingKey = `${data.timestamp || ''}:${data.lpm}`;
+    if (readingKey === lastSavedReadingKey) return;
+
     savingReading = true;
 
     try {
@@ -140,6 +146,7 @@
       // Limitar la frecuencia solo después de una inserción exitosa.
       // Si Supabase rechaza la fila, la siguiente lectura válida puede reintentar.
       lastReadingAttemptAt = Date.now();
+      lastSavedReadingKey = readingKey;
       readingErrorShown = false;
 
       // Recargar el historial desde la base para reflejar solo filas realmente guardadas.
@@ -246,6 +253,7 @@
     readingPollTimer = null;
     lastPayloadSignature = '';
     lastTelemetryAt = 0;
+    lastSavedReadingKey = '';
     window.AMARLiveReadingActive = false;
     characteristic = null;
     databaseDeviceId = null;
