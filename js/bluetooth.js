@@ -19,6 +19,18 @@
     const bpm = document.querySelector('#bpm');
     const readingTime = document.querySelector('#readingTime');
     const heartState = document.querySelector('#heartState');
+    const waveform = document.querySelector('#heartbeatWave');
+    const waveformBox = document.querySelector('.heartbeat-visual');
+
+    if (Number.isFinite(data.lpm) && data.lpm > 0 && data.lpm <= 300) {
+      if (waveformBox) {
+        waveformBox.dataset.lpm = String(data.lpm);
+        waveformBox.classList.add('is-live');
+      }
+      if (waveform) {
+        waveform.style.setProperty('--beat-duration', `${Math.max(0.45, Math.min(1.5, 60 / data.lpm))}s`);
+      }
+    }
 
     if (Number.isFinite(data.lpm) && data.lpm > 0 && data.lpm <= 300) {
       if (bpm) bpm.textContent = String(data.lpm);
