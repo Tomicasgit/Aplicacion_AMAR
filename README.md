@@ -1,8 +1,8 @@
-# A.M.A.R. — Alerta de Latidos y Monitoreo Autónomo
+# A.M.A.R. — Asistente de Monitoreo Autónomo de Ritmo
 
 A.M.A.R. es un prototipo de monitoreo de frecuencia cardíaca compuesto por una aplicación web y un dispositivo basado en ESP32.
 
-La aplicación permite gestionar usuarios, perfiles, dispositivos vinculados, contactos de emergencia, historial de mediciones, ubicaciones y alertas.
+La aplicación permite gestionar usuarios, perfiles, dispositivos vinculados, contactos de emergencia, historial de mediciones, ubicaciones y alertas. El dispositivo IdeaSpark ESP32 procesa lecturas del sensor MAX30102 y transmite las mediciones a la aplicación mediante Bluetooth Low Energy (BLE).
 
 > A.M.A.R. es un prototipo de monitoreo. No diagnostica enfermedades ni reemplaza la atención médica profesional.
 
@@ -33,7 +33,7 @@ La interfaz utiliza la paleta **A.M.A.R. Pulse**, definida en `style.css`. La do
 
 La aplicación web está preparada para publicarse como sitio estático, por ejemplo mediante GitHub Pages. La autenticación y los datos dependen de la configuración del proyecto Supabase y de sus políticas de seguridad.
 
-## Seguridad y privacidad
+## Alertas por correo\n\nLa función `supabase/functions/amar-sos/index.ts` registra solicitudes SOS y puede enviar un correo a cada contacto con email usando Resend. Para habilitar los envíos en el proyecto Supabase, configurar estos secretos en el entorno de las Edge Functions:\n\n- `RESEND_API_KEY`: clave privada de Resend (solo del lado del servidor).\n- `RESEND_FROM_EMAIL`: remitente autorizado/verificado en Resend, por ejemplo `A.M.A.R. <alertas@tu-dominio.com>`.\n\nSi esos secretos no están configurados, la alerta se guarda, pero no se envía el correo. Los botones de teléfono, email y WhatsApp abren la aplicación correspondiente y requieren que la persona confirme el contacto; no envían mensajes automáticamente. Esta versión no implementa notificaciones push ni una alarma remota en el dispositivo de los contactos.\n\n## Seguridad y privacidad
 
 - Las tablas deben mantener políticas RLS adecuadas para restringir el acceso a los datos de cada usuario.
 - No publicar claves secretas de Supabase.
