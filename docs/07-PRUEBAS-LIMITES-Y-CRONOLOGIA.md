@@ -96,3 +96,27 @@ Esta tabla resume hitos por período; no equivale a un registro auditado de cada
 - Revisar las políticas RLS tras añadir tablas o nuevas consultas.
 - Revisar esta documentación cada vez que cambie el comportamiento real.
 - Registrar pruebas físicas del dispositivo y no confundirlas con pruebas de software.
+
+
+## 8. Estado técnico documentado al 11 de octubre de 2026
+
+### Observaciones registradas durante el desarrollo
+
+- En una prueba de la versión v5.2 se observó que el dispositivo conectaba por BLE y mostraba aproximadamente 63–68 LPM con indicador de calidad 4–5/5. En esa misma etapa, la web permanecía en “Conectado, esperando datos del sensor”. Esto demostró que la conexión BLE por sí sola no bastaba para confirmar recepción y procesamiento en el navegador.
+- Posteriormente se ajustó el cliente web para incluir `device_id` al guardar `heart_readings`, reintentar tras ciertos errores y procesar paquetes BLE repetidos; también se actualizaron referencias de caché de scripts.
+- El firmware canónico se mantiene en el repositorio separado [ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030), en `Completop.ino`, que declara v5.3.
+- La referencia completa del algoritmo, estados, pantalla, reloj y JSON se encuentra en [24 — Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md).
+
+### Qué no debe darse por probado
+
+No hay que inferir que las modificaciones posteriores resolvieron el flujo completo sin repetir la prueba. Quedan por registrar con evidencia:
+- compilación del sketch canónico v5.3;
+- carga del dashboard en la placa física;
+- recepción de JSON por READ y NOTIFY en el navegador objetivo;
+- coincidencia entre el JSON emitido y el parser de `js/bluetooth.js`;
+- persistencia de lecturas y asociación correcta de `device_id`;
+- recuperación tras desconexión y reconexión;
+- sincronización de timestamp;
+- resultado del flujo SOS/correo en el proyecto Supabase desplegado.
+
+En la bitácora, separar “observado”, “cambiado en código” y “verificado después del cambio”. No marcar como aprobado un caso solo porque se publicó un commit.
