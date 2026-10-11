@@ -84,6 +84,26 @@
     return data;
   }
 
+  function communicationStatusText(result) {
+    if (Number(result?.email_sent_count) > 0) {
+      return `Se enviaron ${result.email_sent_count} correo(s) de aviso a los contactos.`;
+    }
+
+    if (result?.email_configured === false) {
+      return "La alerta quedó registrada, pero falta configurar el servicio de correo en Supabase.";
+    }
+
+    if (Number(result?.email_contacts_count) === 0) {
+      return "La alerta quedó registrada, pero no hay contactos con correo electrónico.";
+    }
+
+    if (Number(result?.email_failed_count) > 0) {
+      return "La alerta quedó registrada, pero no se pudo enviar el correo a los contactos.";
+    }
+
+    return "La alerta quedó registrada. No se pudo confirmar el envío de correos.";
+  }
+
   // =========================================================
   // UBICACIÓN
   // =========================================================
@@ -520,13 +540,12 @@
     }
 
     try {
-
-await requestSOSFunction({
-  type: "automatic_sos",
-  message: reason === "timeout"
-    ? "Alerta automática: terminó la cuenta regresiva sin respuesta."
-    : "Alerta automática: solicitud confirmada por el usuario."
-});
+      const sosResult = await requestSOSFunction({
+        type: "automatic_sos",
+        message: reason === "timeout"
+          ? "Alerta automática: terminó la cuenta regresiva sin respuesta."
+          : "Alerta automática: solicitud confirmada por el usuario."
+      });
 
       let locationSaved = false;
 
@@ -560,10 +579,9 @@ await requestSOSFunction({
 
           ${contactsHTML}
 
-          <p>
-            <strong>
-              La alerta quedó registrada. No se enviaron mensajes automáticamente.
-            </strong>
+          <p><strong>${escapeContactHTML(communicationStatusText(sosResult))}</strong></p>
+          <p class="sos-disclaimer">
+            A.M.A.R. no realiza llamadas automáticas ni activa una alarma en el teléfono de los contactos.
           </p>
 
           <button
@@ -684,10 +702,11 @@ const alert = result.alert;
 
             ${contactsHTML}
 
+            <p><strong>${escapeContactHTML(communicationStatusText(result))}</strong></p>
             <p class="sos-disclaimer">
-              Esta acción no envía mensajes automáticamente.
-              Si necesitás asistencia inmediata, contactá directamente
-              a los servicios de emergencia.
+              Los botones de teléfono y WhatsApp abren la aplicación para que completes el contacto.
+              A.M.A.R. no realiza llamadas automáticas ni activa una alarma remota.
+              Si necesitás asistencia inmediata, contactá directamente a los servicios de emergencia.
             </p>
 
             <button
