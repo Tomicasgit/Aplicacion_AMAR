@@ -1599,3 +1599,92 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .sos-confirmation > button.primary:hover { transform: none; }
 }
+
+
+/* Pulido del dashboard principal: jerarquía, profundidad y consistencia */
+.dashboard {
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(32,214,194,.045), transparent 34%),
+    radial-gradient(ellipse at 96% 14%, rgba(85,184,255,.035), transparent 30%),
+    var(--bg);
+}
+.dashboard .top {
+  align-items: center;
+  gap: 18px;
+}
+.dashboard .grid {
+  align-items: stretch;
+}
+.dashboard .card {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(62,86,112,.62);
+}
+.dashboard .card:hover {
+  border-color: rgba(85,184,255,.34);
+  transform: translateY(-2px);
+}
+.dashboard .pulse {
+  border-color: rgba(32,214,194,.28);
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(32,214,194,.15), transparent 48%),
+    linear-gradient(145deg, #192C43 0%, #131F32 72%);
+}
+.dashboard .pulse::after {
+  position: absolute;
+  top: 0;
+  right: 22px;
+  left: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(32,214,194,.55), transparent);
+  content: "";
+  pointer-events: none;
+}
+.dashboard .metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(145deg, rgba(22,36,56,.96), rgba(15,27,44,.98));
+}
+.dashboard .metric > small {
+  color: #9DB1C5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .105em;
+  text-transform: uppercase;
+}
+.dashboard .metric > b {
+  line-height: 1.28;
+}
+.dashboard .daily-summary-card,
+.dashboard .wide:not(.danger) {
+  background: linear-gradient(145deg, rgba(21,35,54,.98), rgba(15,27,44,.98));
+}
+.dashboard .danger {
+  border-color: rgba(255,93,112,.24);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(255,93,112,.07), transparent 42%),
+    linear-gradient(145deg, rgba(38,30,46,.88), rgba(17,29,46,.98));
+}
+.dashboard .sos-button {
+  min-height: 54px;
+  margin-top: 22px;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #F04F65 0%, #D92F49 100%);
+  box-shadow: 0 10px 24px rgba(217,47,73,.2), 0 1px 0 rgba(255,255,255,.13) inset;
+  font-size: 12px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.dashboard .sos-button:hover {
+  box-shadow: 0 13px 28px rgba(217,47,73,.28), 0 1px 0 rgba(255,255,255,.17) inset;
+}
+.dashboard .sos-button:focus-visible {
+  outline: 3px solid #55B8FF;
+  outline-offset: 4px;
+}
+@media (max-width: 760px) {
+  .dashboard .top { align-items: flex-start; }
+  .dashboard .card:hover { transform: none; }
+}
