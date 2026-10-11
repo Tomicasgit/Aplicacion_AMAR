@@ -1,9 +1,10 @@
 # A.M.A.R. — Documentación maestra del proyecto
 
-> **Nombre oficial:** A.M.A.R. — **Asistente de Monitoreo Autónomo de Ritmo**  
+> **Nombre del proyecto:** A.M.A.R. — **Alerta de Latidos y Monitoreo Autónomo**.  
 > **Tipo:** prototipo académico integrado de hardware y aplicación web.  
-> **Repositorio:** [Tomicasgit/Aplicacion_AMAR](https://github.com/Tomicasgit/Aplicacion_AMAR)  
-> **Firmware declarado en el sketch:** v4.1  
+> **Repositorio web:** [Tomicasgit/Aplicacion_AMAR](https://github.com/Tomicasgit/Aplicacion_AMAR)  
+> **Repositorio del firmware vigente:** [Tomicasgit/ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030), sketch que declara v5.3.  
+> **Nota de compatibilidad:** la copia `Completop.ino` de este repositorio web declara v4.1 y es histórica; no es la fuente de verdad del dispositivo actual.  
 > **Estado de la documentación:** guía funcional, técnica, de operación, seguridad, pruebas y uso.
 
 > **¿Querés explorar todas las mejoras posibles y cómo implementarlas?** Consultá el [Catálogo integral de mejoras y hoja de ruta](README-MEJORAS.md), un documento independiente con propuestas de frontend, UX, BLE, firmware, seguridad, datos, SOS, pruebas, despliegue, investigación y un plan de ejecución por etapas.
@@ -21,7 +22,7 @@ A.M.A.R. es un prototipo que combina un dispositivo basado en ESP32 y sensor óp
 | Entender la idea sin entrar en código | [01 — Proyecto y alcance](docs/01-PROYECTO-Y-ALCANCE.md) |
 | Entender cómo se conecta todo | [02 — Arquitectura](docs/02-ARQUITECTURA.md) |
 | Saber qué hace cada archivo | [09 — Catálogo del código](docs/09-CATALOGO-DE-CODIGO.md) |
-| Comprender el dispositivo y los parámetros | [04 — Hardware y firmware](docs/04-HARDWARE-Y-FIRMWARE.md) y [17 — Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) |
+| Comprender el dispositivo y los parámetros | [04 — Hardware y firmware](docs/04-HARDWARE-Y-FIRMWARE.md), [17 — Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) y [24 — Lógica completa de firmware v5.3](docs/24-REFERENCIA-FIRMWARE-V5.3.md) |
 | Comprender tablas y datos | [08 — Diccionario de datos](docs/08-DICCIONARIO-DE-DATOS.md) |
 | Comprender el SOS y el correo | [05 — Backend y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md) y [10 — Contratos y flujos API](docs/10-CONTRATOS-Y-FLUJOS-API.md) |
 | Usar la aplicación | [18 — Manual de usuario](docs/18-MANUAL-DE-USUARIO.md) |
@@ -32,7 +33,7 @@ A.M.A.R. es un prototipo que combina un dispositivo basado en ESP32 y sensor óp
 
 ## 2. Índice completo de documentación
 
-Los documentos están numerados para facilitar su lectura en orden. Las afirmaciones técnicas describen el código consultado; los detalles que dependen del proyecto desplegado (por ejemplo, tipos SQL, políticas RLS o entrega final de correo) deben verificarse en ese entorno.
+Los documentos están numerados para facilitar su lectura en orden. Las afirmaciones técnicas describen el código consultado; los detalles que dependen del proyecto desplegado (por ejemplo, tipos SQL, políticas RLS o entrega final de correo) deben verificarse en ese entorno. La referencia 24 documenta el firmware v5.3 del repositorio canónico separado; la copia v4.1 que permanece en este repositorio es histórica.
 
 | N.º | Documento | Contenido |
 |---:|---|---|
@@ -59,6 +60,8 @@ Los documentos están numerados para facilitar su lectura en orden. Las afirmaci
 | 21 | [Memoria descriptiva académica](docs/21-MEMORIA-DESCRIPTIVA-PARA-PRESENTACION.md) | Resumen no técnico, objetivos, metodología, evaluación y trabajo futuro. |
 | 22 | [Requisitos funcionales y no funcionales](docs/22-REQUISITOS-FUNCIONALES-Y-NO-FUNCIONALES.md) | Matriz de requisitos, actores y casos de uso. |
 | 23 | [Pendientes y deuda técnica](docs/23-PENDIENTES-Y-DEUDA-TECNICA.md) | Validaciones pendientes, riesgos, prioridades y definición de terminado. |
+| 24 | [Referencia completa del firmware v5.3](docs/24-REFERENCIA-FIRMWARE-V5.3.md) | Lógica del sensor, filtros, estados, calidad, alertas internas, pantalla, reloj, BLE y ciclo principal. |
+| 25 | [Estado actual y bitácora técnica](docs/25-ESTADO-ACTUAL-Y-BITACORA.md) | Arquitectura vigente, separación de repositorios, cambios recientes, verificación y pendientes. |
 | — | [Índice de la carpeta docs](docs/README.md) | Navegación dentro de la documentación. |
 | — | [Referencia rápida de colores](README-PALETA.md) | Paleta visual resumida. |
 
@@ -108,7 +111,7 @@ Aplicacion_AMAR/
 ├── style.css
 ├── supabase-config.js
 ├── app.js
-├── Completop.ino
+├── Completop.ino              # copia histórica v4.1; firmware canónico en ESP32_Proyecto2030
 ├── package.json / package-lock.json
 ├── README.md
 ├── README-PALETA.md
@@ -131,7 +134,7 @@ Aplicacion_AMAR/
     ├── 01…19 documentos especializados
 ```
 
-Para la descripción archivo por archivo y las dependencias de carga, consultar [09 — Catálogo del código](docs/09-CATALOGO-DE-CODIGO.md). El árbol se debe actualizar si se agregan, eliminan o renombran archivos.
+Para la descripción archivo por archivo y las dependencias de carga, consultar [09 — Catálogo del código](docs/09-CATALOGO-DE-CODIGO.md). El árbol se debe actualizar si se agregan, eliminan o renombran archivos. El firmware vigente y su documentación de montaje se mantienen en [ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030); la lógica está explicada en [24 — Referencia completa del firmware v5.3](docs/24-REFERENCIA-FIRMWARE-V5.3.md).
 
 ## 6. Funciones de usuario
 
