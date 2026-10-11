@@ -55,6 +55,35 @@
     return data;
   }
 
+  async function requestSOSFunction({ type, message }) {
+    await getCurrentUser();
+
+    const { data, error } = await supabaseClient.functions.invoke(
+      "amar-sos",
+      {
+        body: {
+          type,
+          message
+        }
+      }
+    );
+
+    if (error) {
+      console.error("Error al invocar amar-sos:", error);
+      throw new Error(
+        "No se pudo comunicar con el servicio SOS de Supabase."
+      );
+    }
+
+    if (!data?.success) {
+      throw new Error(
+        data?.error || "Supabase no pudo registrar la alerta."
+      );
+    }
+
+    return data;
+  }
+
   // =========================================================
   // UBICACIÓN
   // =========================================================
@@ -376,12 +405,13 @@
     }
 
     try {
-      await registerAlert({
-        type: "device",
-        message: reason === "timeout"
-          ? "Alerta automática: terminó la cuenta regresiva sin respuesta."
-          : "Alerta automática: solicitud confirmada por el usuario."
-      });
+
+await requestSOSFunction({
+  type: "automatic_sos",
+  message: reason === "timeout"
+    ? "Alerta automática: terminó la cuenta regresiva sin respuesta."
+    : "Alerta automática: solicitud confirmada por el usuario."
+});
 
       let locationSaved = false;
 
@@ -486,10 +516,13 @@
     }
 
     try {
-      const alert = await registerAlert({
-        type: "sos",
-        message: "Solicitud manual de ayuda desde A.M.A.R."
-      });
+
+const result = await requestSOSFunction({
+  type: "manual_sos",
+  message: "Solicitud manual de ayuda desde A.M.A.R."
+});
+
+const alert = result.alert;
 
       let locationSaved = false;
       let locationMessage = "No se pudo guardar la ubicación.";
