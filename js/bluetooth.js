@@ -11,6 +11,9 @@
   const READING_SAVE_INTERVAL_MS = 60000;
   let savingReading = false;
   let readingErrorShown = false;
+  let readingPollTimer = null;
+  let lastPayloadSignature = '';
+  let lastTelemetryAt = 0;
 
   function setConnectionStatus(text) {
     const badge = document.querySelector('#deviceBadge');
@@ -146,8 +149,7 @@
     }
   }
 
-  async function handleNotification(event) {
-    const value = event.target.value;
+  async function processTelemetryValue(value, source = 'BLE') {
     const bytes = new Uint8Array(
       value.buffer,
       value.byteOffset,
@@ -155,9 +157,15 @@
     );
 
     try {
-      const json = new TextDecoder().decode(bytes);
+      const json = new TextDecoder().decode(bytes).replace(/\\0+$/g, '').trim();
+      if (!json.startsWith('{')) return;
       const data = JSON.parse(json);
-      console.debug('A.M.A.R. — telemetría BLE recibida:', data);
+      lastTelemetryAt = Date.now();
+      const signature = JSON.stringify(data);
+      if (signature !== lastPayloadSignature) {
+        lastPayloadSignature = signature;
+        console.info('A.M.A.R. — telemetría recibida por ' + source + '.', data);
+      }
 
       if (window.AMARAlerts?.processReading) {
         const resultado = window.AMARAlerts.processReading(data);
@@ -175,9 +183,30 @@
       }
 
       updateReading(data);
+      updateReading(data);
       await saveReading(data);
     } catch (error) {
-      console.error('No se pudo interpretar la telemetría BLE:', error);
+      console.error('No se pudo interpretar la telemetría A.M.A.R.:', error);
+    }
+  }
+
+  async function handleNotification(event) {
+    await processTelemetryValue(event.target.value, 'notificación BLE');
+  }
+
+  async function pollCharacteristicValue() {
+    if (!characteristic || !bluetoothDevice?.gatt?.connected) return;
+    try {
+      // Respaldo para móviles que mantienen la conexión pero pierden notificaciones.
+      // La característica del firmware también admite READ.
+      const value = await characteristic.readValue();
+      await processTelemetryValue(value, 'lectura BLE');
+      if (Date.now() - lastTelemetryAt > 5000) {
+        const state = document.querySelector('#heartState');
+        if (state) state.textContent = 'Conectado; esperando datos del sensor';
+      }
+    } catch (error) {
+      console.warn('No se pudo leer la característica BLE:', error);
     }
   }
 
@@ -198,6 +227,10 @@
       );
     }
 
+    if (readingPollTimer) clearInterval(readingPollTimer);
+    readingPollTimer = null;
+    lastPayloadSignature = '';
+    lastTelemetryAt = 0;
     characteristic = null;
     databaseDeviceId = null;
     currentUserId = null;
@@ -320,6 +353,10 @@
       );
 
       await characteristic.startNotifications();
+      // Respaldo de notificaciones: consultar la característica READ cada segundo.
+      if (readingPollTimer) clearInterval(readingPollTimer);
+      await pollCharacteristicValue();
+      readingPollTimer = setInterval(pollCharacteristicValue, 1000);
 
       // Sin Wi-Fi, el navegador sincroniza el reloj del ESP32 al conectar.
       try {
