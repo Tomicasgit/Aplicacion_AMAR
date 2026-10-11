@@ -86,8 +86,17 @@
   }
 
   function communicationStatusText(result) {
-    if (Number(result?.email_sent_count) > 0) {
-      return `Se enviaron ${result.email_sent_count} correo(s) de aviso a los contactos.`;
+    const sent = Number(result?.email_sent_count) || 0;
+    const failed = Number(result?.email_failed_count) || 0;
+
+    // El éxito parcial también es éxito: no informar un fallo total si
+    // Resend confirmó uno o más envíos y solo otros destinatarios fallaron.
+    if (sent > 0 && failed > 0) {
+      return `Alerta registrada. El servicio confirmó ${sent} correo(s) enviado(s); ${failed} no pudieron enviarse.`;
+    }
+
+    if (sent > 0) {
+      return `Alerta registrada. El servicio confirmó el envío de ${sent} correo(s) de aviso.`;
     }
 
     if (result?.email_configured === false) {
@@ -98,11 +107,11 @@
       return "La alerta quedó registrada, pero no hay contactos con correo electrónico.";
     }
 
-    if (Number(result?.email_failed_count) > 0) {
-      return "La alerta quedó registrada, pero no se pudo enviar el correo a los contactos.";
+    if (failed > 0) {
+      return `La alerta quedó registrada, pero el servicio no pudo enviar ${failed} correo(s).`;
     }
 
-    return "La alerta quedó registrada. No se pudo confirmar el envío de correos.";
+    return "La alerta quedó registrada. El servicio no devolvió una confirmación de envío.";
   }
 
   async function refreshDashboardSafely() {
@@ -201,7 +210,7 @@
 
       const { data: contacts, error } = await supabaseClient
         .from("emergency_contacts")
-        .select("id, name, phone, email")
+        .select("id, name, phone")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -219,14 +228,8 @@
       const items = contacts.map(contact => {
         const name = escapeContactHTML(contact.name || "Contacto");
         const phone = String(contact.phone || "").trim();
-        const email = String(contact.email || "").trim();
-
         const callLink = phone
           ? `<a class="call-button" href="tel:${escapeContactHTML(phone)}">Llamar</a>`
-          : "";
-
-        const emailLink = email
-          ? `<button type="button" class="email-button" data-amar-send-email="${escapeContactHTML(contact.id)}" aria-label="Enviar aviso SOS por correo a ${name}">Enviar aviso por correo</button>`
           : "";
 
         // WhatsApp necesita el número en formato internacional, solo con dígitos.
@@ -262,11 +265,10 @@
             <strong>${name}</strong>
             <div class="record-actions">
               ${callLink}
-              ${emailLink}
               ${whatsappLink}
             </div>
-            ${!phone && !email
-              ? "<small>Este contacto no tiene teléfono ni correo disponible.</small>"
+            ${!phone
+              ? "<small>Este contacto no tiene un teléfono disponible para llamada o WhatsApp.</small>"
               : ""}
           </li>
         `;
@@ -275,7 +277,7 @@
       return `
         <section class="sos-emergency-contacts">
           <h3>Contactos de emergencia</h3>
-          <p>Elegí una acción para comunicarte con un contacto.</p>
+          <p>Elegí una forma de contacto disponible. El aviso por correo se gestiona desde la solicitud SOS.</p>
           <ul class="sos-contact-list">${items}</ul>
           <p class="sos-disclaimer">
             Estas acciones abren la aplicación correspondiente.
