@@ -145,11 +145,17 @@ Adafruit_ST7789 pantalla(
   Config::Pines::TFT_RST
 );
 
-const uint16_t COLOR_FONDO = ST77XX_BLACK;
-const uint16_t COLOR_VERDE = ST77XX_GREEN;
-const uint16_t COLOR_BLANCO = ST77XX_WHITE;
-const uint16_t COLOR_AMARILLO = ST77XX_YELLOW;
-const uint16_t COLOR_ROJO = ST77XX_RED;
+const uint16_t COLOR_FONDO = 0xF7BF;
+const uint16_t COLOR_VERDE = 0xE26D;
+const uint16_t COLOR_BLANCO = 0xFFFF;
+const uint16_t COLOR_AMARILLO = 0xB3C3;
+const uint16_t COLOR_ROJO = 0xC9AA;
+const uint16_t COLOR_ACENTO = 0xE26D;
+const uint16_t COLOR_ACENTO_OSCURO = 0xC9AA;
+const uint16_t COLOR_TEXTO = 0x2126;
+const uint16_t COLOR_SECUNDARIO = 0x73D1;
+const uint16_t COLOR_BORDE = 0xE75D;
+const uint16_t COLOR_OK = 0x14AC;
 
 unsigned long tiempoUltimaPantalla = 0;
 bool pantallaInicializada = false;
@@ -197,45 +203,70 @@ void dibujarPantallaBase() {
   pantalla.fillScreen(COLOR_FONDO);
   pantalla.setTextWrap(false);
 
-  pantalla.drawRect(3, 3, 164, 43, COLOR_VERDE);
+  // Encabezado oscuro con marca coral, coherente con la app web.
+  pantalla.fillRoundRect(6, 6, 158, 43, 8, COLOR_TEXTO);
+  pantalla.fillRoundRect(12, 12, 29, 29, 7, COLOR_ACENTO);
+  pantalla.drawLine(16, 27, 21, 27, COLOR_BLANCO);
+  pantalla.drawLine(21, 27, 25, 19, COLOR_BLANCO);
+  pantalla.drawLine(25, 19, 29, 33, COLOR_BLANCO);
+  pantalla.drawLine(29, 33, 34, 24, COLOR_BLANCO);
+  pantalla.drawLine(34, 24, 38, 24, COLOR_BLANCO);
 
-  pantalla.setTextColor(COLOR_VERDE);
+  pantalla.setTextColor(COLOR_BLANCO);
   pantalla.setTextSize(2);
-  pantalla.setCursor(12, 9);
-  pantalla.print("A.M.A.R");
-
+  pantalla.setCursor(48, 12);
+  pantalla.print("A.M.A.R.");
   pantalla.setTextSize(1);
-  pantalla.setCursor(12, 31);
-  pantalla.print("MONITOREO DE LATIDOS");
+  pantalla.setTextColor(0xD6DA);
+  pantalla.setCursor(49, 32);
+  pantalla.print("MONITOREO PERSONAL");
 
-  pantalla.drawRect(5, 52, 160, 35, COLOR_VERDE);
-  pantalla.setCursor(11, 58);
-  pantalla.print("ESTADO DEL SENSOR");
+  // Estado del contacto.
+  pantalla.fillRoundRect(6, 54, 158, 25, 7, COLOR_BLANCO);
+  pantalla.drawRoundRect(6, 54, 158, 25, 7, COLOR_BORDE);
 
-  pantalla.setCursor(10, 96);
+  // Tarjeta de frecuencia cardíaca.
+  pantalla.fillRoundRect(6, 84, 158, 104, 9, COLOR_BLANCO);
+  pantalla.drawRoundRect(6, 84, 158, 104, 9, COLOR_BORDE);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.setTextSize(1);
+  pantalla.setCursor(15, 94);
   pantalla.print("FRECUENCIA CARDIACA");
-  pantalla.drawFastHLine(8, 112, 154, COLOR_VERDE);
 
-  pantalla.drawFastHLine(8, 174, 154, COLOR_VERDE);
-  pantalla.setCursor(10, 183);
-  pantalla.print("PROMEDIO LPM");
+  // Línea visual decorativa; no representa un electrocardiograma.
+  pantalla.drawFastHLine(17, 170, 25, COLOR_BORDE);
+  pantalla.drawLine(42, 170, 48, 170, COLOR_ACENTO);
+  pantalla.drawLine(48, 170, 54, 160, COLOR_ACENTO);
+  pantalla.drawLine(54, 160, 60, 178, COLOR_ACENTO);
+  pantalla.drawLine(60, 178, 66, 165, COLOR_ACENTO);
+  pantalla.drawLine(66, 165, 72, 170, COLOR_ACENTO);
+  pantalla.drawFastHLine(72, 170, 80, COLOR_BORDE);
 
-  pantalla.setCursor(10, 216);
-  pantalla.print("CALIDAD:");
+  // Tarjetas de promedio y calidad.
+  pantalla.fillRoundRect(6, 194, 76, 51, 8, COLOR_BLANCO);
+  pantalla.drawRoundRect(6, 194, 76, 51, 8, COLOR_BORDE);
+  pantalla.fillRoundRect(88, 194, 76, 51, 8, COLOR_BLANCO);
+  pantalla.drawRoundRect(88, 194, 76, 51, 8, COLOR_BORDE);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.setTextSize(1);
+  pantalla.setCursor(13, 201);
+  pantalla.print("PROMEDIO");
+  pantalla.setCursor(96, 201);
+  pantalla.print("CALIDAD");
 
-  pantalla.drawFastHLine(8, 238, 154, COLOR_VERDE);
+  // Estado del sensor y Bluetooth.
+  pantalla.fillRoundRect(6, 251, 158, 38, 8, COLOR_BLANCO);
+  pantalla.drawRoundRect(6, 251, 158, 38, 8, COLOR_BORDE);
+  pantalla.setTextSize(1);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.setCursor(13, 258);
+  pantalla.print("SENSOR");
+  pantalla.setCursor(13, 275);
+  pantalla.print("BLUETOOTH");
 
-  pantalla.setCursor(10, 247);
-  pantalla.print("SENSOR:");
-
-  pantalla.setCursor(10, 265);
-  pantalla.print("BLUETOOTH:");
-
-  pantalla.drawFastHLine(8, 285, 154, COLOR_VERDE);
-  pantalla.setCursor(10, 294);
-  pantalla.print("HORA:");
-
-  pantalla.drawRect(3, 3, 164, 314, COLOR_VERDE);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.setCursor(8, 300);
+  pantalla.print("HORA");
 }
 
 void iniciarPantalla() {
@@ -253,23 +284,33 @@ void iniciarPantalla() {
 
   pantalla.init(170, 320);
   pantalla.setRotation(0);
-  pantalla.setSPISpeed(40000000);
+  pantalla.setSPISpeed(10000000);
 
-  pantalla.fillScreen(COLOR_FONDO);
-  pantalla.setTextColor(COLOR_VERDE);
+  // Prueba visual de arranque.
+  pantalla.fillScreen(ST77XX_RED);
+  Serial.println("TFT TEST 1/4: ROJO");
+  delay(250);
+  pantalla.fillScreen(ST77XX_GREEN);
+  Serial.println("TFT TEST 2/4: VERDE");
+  delay(250);
+  pantalla.fillScreen(ST77XX_BLUE);
+  Serial.println("TFT TEST 3/4: AZUL");
+  delay(250);
+
+  pantalla.fillScreen(ST77XX_BLACK);
+  pantalla.setTextWrap(false);
+  pantalla.setTextColor(ST77XX_WHITE);
   pantalla.setTextSize(2);
-  pantalla.setCursor(14, 115);
+  pantalla.setCursor(10, 110);
   pantalla.print("A.M.A.R");
-
   pantalla.setTextSize(1);
-  pantalla.setCursor(14, 143);
-  pantalla.print("INICIANDO SISTEMA...");
-
-  delay(700);
+  pantalla.setCursor(10, 140);
+  pantalla.print("PRUEBA TFT v5.0");
+  Serial.println("TFT TEST 4/4: TEXTO");
+  delay(1200);
 
   dibujarPantallaBase();
   pantallaInicializada = true;
-
   Serial.println("Pantalla ST7789 inicializada.");
 }
 
@@ -278,117 +319,136 @@ void escribirCampo(
   const char* texto, uint16_t color,
   uint8_t tamano
 ) {
-  pantalla.fillRect(x, y, ancho, alto, COLOR_FONDO);
+  const char* contenido = texto != nullptr ? texto : "";
+  pantalla.fillRect(x, y, ancho, alto, COLOR_BLANCO);
   pantalla.setCursor(x, y);
   pantalla.setTextSize(tamano);
   pantalla.setTextColor(color);
-  pantalla.print(texto);
+  pantalla.print(contenido);
 }
 
 void actualizarPantalla() {
   if (!pantallaInicializada) return;
 
   const unsigned long ahora = millis();
-
-  if (ahora - tiempoUltimaPantalla < 500) return;
+  if (ahora - tiempoUltimaPantalla < 200) return;
   tiempoUltimaPantalla = ahora;
 
   const char* estado = obtenerEstadoSensor();
+  const bool medicionValida = hayMedicionValida();
   uint16_t colorEstado = COLOR_AMARILLO;
+  const char* textoEstado = "SIN CONTACTO";
 
   if (strcmp(estado, "error_sensor") == 0) {
     colorEstado = COLOR_ROJO;
-  } else if (strcmp(estado, "midiendo") == 0) {
-    colorEstado = COLOR_VERDE;
-  }
-
-  const char* textoEstado = "SIN DEDO";
-
-  if (strcmp(estado, "error_sensor") == 0) {
     textoEstado = "ERROR SENSOR";
   } else if (strcmp(estado, "estabilizando") == 0) {
-    textoEstado = "ESTABILIZANDO";
+    colorEstado = COLOR_AMARILLO;
+    textoEstado = "LEYENDO PULSO";
+  } else if (strcmp(estado, "sin_dedo") == 0) {
+    colorEstado = COLOR_ACENTO;
+    textoEstado = "SIN CONTACTO";
   } else if (strcmp(estado, "midiendo") == 0) {
+    colorEstado = COLOR_OK;
     textoEstado = "MONITOREANDO";
   }
 
-  escribirCampo(
-    11, 70, 146, 14,
-    textoEstado, colorEstado, 1
-  );
+  pantalla.fillRoundRect(9, 57, 152, 19, 5, COLOR_BLANCO);
+  pantalla.fillCircle(16, 66, 3, colorEstado);
+  pantalla.setCursor(24, 62);
+  pantalla.setTextSize(1);
+  pantalla.setTextColor(colorEstado);
+  pantalla.print(textoEstado);
 
-  char textoLPM[12];
-
-  if (hayMedicionValida()) {
-    snprintf(
-      textoLPM, sizeof(textoLPM),
-      "%d", (int)(ultimoLPM + 0.5f)
-    );
+  // LPM instantáneas: mostrar "--" si no existe una lectura válida.
+  pantalla.fillRect(13, 111, 144, 48, COLOR_BLANCO);
+  pantalla.setCursor(20, 116);
+  pantalla.setTextSize(4);
+  pantalla.setTextColor(medicionValida ? COLOR_ACENTO : COLOR_SECUNDARIO);
+  if (medicionValida) {
+    pantalla.print((int)(ultimoLPM + 0.5f));
   } else {
-    snprintf(textoLPM, sizeof(textoLPM), "--");
+    pantalla.print("--");
+  }
+  pantalla.setCursor(119, 133);
+  pantalla.setTextSize(1);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.print("LPM");
+
+  // Promedio de las lecturas válidas.
+  pantalla.fillRect(12, 213, 64, 27, COLOR_BLANCO);
+  pantalla.setCursor(19, 216);
+  pantalla.setTextSize(2);
+  pantalla.setTextColor(medicionValida ? COLOR_ACENTO : COLOR_SECUNDARIO);
+  if (medicionValida && promedioLPM > 0) {
+    pantalla.printf("%d", (int)(promedioLPM + 0.5f));
+  } else {
+    pantalla.print("--");
+  }
+  pantalla.setCursor(51, 224);
+  pantalla.setTextSize(1);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.print("LPM");
+
+  // Calidad orientativa de la señal (0–5).
+  pantalla.fillRect(94, 213, 64, 27, COLOR_BLANCO);
+  pantalla.setCursor(105, 216);
+  pantalla.setTextSize(2);
+  pantalla.setTextColor(calcularCalidad() > 0 ? COLOR_OK : COLOR_SECUNDARIO);
+  pantalla.printf("%d/5", calcularCalidad());
+
+  pantalla.fillRect(70, 255, 87, 14, COLOR_BLANCO);
+  pantalla.setCursor(72, 258);
+  pantalla.setTextSize(1);
+  if (!sensorActivo || sensorDesconectado) {
+    pantalla.setTextColor(COLOR_ROJO);
+    pantalla.print("ERROR");
+  } else if (!dedoDetectado) {
+    pantalla.setTextColor(COLOR_ACENTO);
+    pantalla.print("SIN CONTACTO");
+  } else {
+    pantalla.setTextColor(COLOR_OK);
+    pantalla.print("CONECTADO");
   }
 
-  escribirCampo(14, 126, 105, 43, textoLPM, COLOR_VERDE, 4);
-  escribirCampo(117, 141, 38, 20, "LPM", COLOR_BLANCO, 2);
-
-  char textoPromedio[20];
-
-  if (hayMedicionValida() && promedioLPM > 0) {
-    snprintf(
-      textoPromedio, sizeof(textoPromedio),
-      "%d LPM", (int)(promedioLPM + 0.5f)
-    );
+  pantalla.fillRect(78, 272, 79, 14, COLOR_BLANCO);
+  pantalla.setCursor(80, 275);
+  pantalla.setTextSize(1);
+  if (bleConectado) {
+    pantalla.setTextColor(COLOR_OK);
+    pantalla.print("CONECTADO");
   } else {
-    snprintf(textoPromedio, sizeof(textoPromedio), "-- LPM");
+    pantalla.setTextColor(COLOR_SECUNDARIO);
+    pantalla.print("ESPERANDO");
   }
-
-  escribirCampo(
-    88, 183, 70, 15,
-    textoPromedio, COLOR_VERDE, 1
-  );
-
-  char textoCalidad[16];
-
-  snprintf(
-    textoCalidad, sizeof(textoCalidad),
-    "%d/5", calcularCalidad()
-  );
-
-  escribirCampo(
-    72, 216, 80, 15,
-    textoCalidad, COLOR_VERDE, 1
-  );
-
-  escribirCampo(
-    58, 247, 98, 14,
-    sensorActivo && !sensorDesconectado
-      ? "CONECTADO" : "ERROR",
-    sensorActivo && !sensorDesconectado
-      ? COLOR_VERDE : COLOR_ROJO,
-    1
-  );
-
-  escribirCampo(
-    78, 265, 78, 14,
-    bleConectado ? "CONECTADO" : "ESPERANDO",
-    bleConectado ? COLOR_VERDE : COLOR_AMARILLO,
-    1
-  );
 
   char timestamp[40] = {};
   obtenerTimestampISO8601(timestamp, sizeof(timestamp));
-
   char hora[12] = "--:--:--";
-
   if (strlen(timestamp) >= 19 && timestamp[10] == 'T') {
     memcpy(hora, timestamp + 11, 8);
     hora[8] = '\0';
   }
 
-  escribirCampo(
-    51, 294, 106, 14,
-    hora, COLOR_VERDE, 1
-  );
+  pantalla.fillRect(33, 294, 126, 18, COLOR_FONDO);
+  pantalla.setCursor(35, 300);
+  pantalla.setTextSize(1);
+  pantalla.setTextColor(COLOR_SECUNDARIO);
+  pantalla.print(hora);
+
+  static unsigned long ultimaTrazaPantalla = 0;
+  if (ahora - ultimaTrazaPantalla >= 2500) {
+    ultimaTrazaPantalla = ahora;
+    Serial.printf(
+      "PANTALLA %s | estado=%s | medicion_valida=%s | LPM=%d | promedio=%d | calidad=%d/5\n",
+      FW_VERSION,
+      estado,
+      medicionValida ? "SI" : "NO",
+      medicionValida ? (int)(ultimoLPM + 0.5f) : 0,
+      medicionValida ? (int)(promedioLPM + 0.5f) : 0,
+      calcularCalidad()
+    );
+  }
 }
 
 // ============================================================
