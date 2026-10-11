@@ -45,7 +45,7 @@ namespace Config {
 
   namespace Sensor {
     constexpr uint8_t I2C_ADDRESS = 0x57;
-    constexpr long UMBRAL_DEDO = 90000;
+    constexpr long UMBRAL_DEDO = 80000;
     constexpr uint32_t VELOCIDAD_I2C = 400000;
 
     constexpr uint8_t MAX_FALLOS_I2C = 3;
