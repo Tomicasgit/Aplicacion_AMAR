@@ -1,88 +1,206 @@
-# A.M.A.R. — Documentación general
+# A.M.A.R. — Documentación maestra del proyecto
 
-> **Nombre oficial:** A.M.A.R. — **Asistente de Monitoreo Autónomo de Ritmo**.  
-> **Estado:** prototipo académico de hardware + aplicación web.  
-> **Repositorio:** [Tomicasgit/Aplicacion_AMAR](https://github.com/Tomicasgit/Aplicacion_AMAR).
+> **Nombre oficial:** A.M.A.R. — **Asistente de Monitoreo Autónomo de Ritmo**  
+> **Tipo:** prototipo académico integrado de hardware y aplicación web.  
+> **Repositorio:** [Tomicasgit/Aplicacion_AMAR](https://github.com/Tomicasgit/Aplicacion_AMAR)  
+> **Firmware declarado en el sketch:** v4.1  
+> **Estado de la documentación:** guía funcional, técnica, de operación, seguridad, pruebas y uso.
 
-A.M.A.R. es un prototipo pensado para registrar y visualizar mediciones de frecuencia cardíaca, conservar un historial consultable y facilitar que una persona solicite ayuda y notifique a sus contactos configurados. El sistema combina un dispositivo basado en ESP32 y sensor óptico MAX30102 con una aplicación web responsive.
+A.M.A.R. es un prototipo que combina un dispositivo basado en ESP32 y sensor óptico MAX30102 con una aplicación web. Su propósito es estimar y mostrar latidos por minuto (LPM), conservar lecturas recibidas para consultar su evolución y facilitar una solicitud SOS con notificación a contactos configurados cuando los servicios de servidor y correo están activos.
 
-**A.M.A.R. no diagnostica, no predice por sí solo un evento médico y no reemplaza un profesional, un electrocardiograma ni los servicios de emergencia.** Las mediciones y los estados mostrados dependen de la calidad del sensor, el firmware, la conexión y la configuración del sistema.
+**Límite fundamental:** A.M.A.R. no es un dispositivo médico certificado, no diagnostica ni descarta enfermedades, no sustituye una consulta médica, un ECG, un tratamiento ni los servicios de emergencia. La calidad de una lectura depende del sensor, el contacto, el movimiento, el firmware, la conexión y las condiciones de uso.
 
-## Índice de documentación
+---
 
-| Documento | Qué explica |
+## 1. Empieza por aquí
+
+| Si necesitás… | Leé… |
 |---|---|
-| [Idea, alcance y requisitos](docs/01-PROYECTO-Y-ALCANCE.md) | Problema, propuesta, usuarios, objetivos, límites y flujo funcional. |
-| [Arquitectura y estructura](docs/02-ARQUITECTURA.md) | Componentes, flujo de datos, carpetas y responsabilidades. |
-| [Aplicación web](docs/03-APLICACION-WEB.md) | HTML, CSS, cada módulo JavaScript, navegación y eventos. |
-| [Hardware y firmware](docs/04-HARDWARE-Y-FIRMWARE.md) | Placa, sensor, pantalla, pines, lectura, BLE y formato de datos. |
-| [Backend, datos y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md) | Supabase, tablas usadas, autenticación, Edge Functions, correo y secretos. |
-| [Diseño y paleta](docs/06-DISENO-Y-PALETA.md) | Sistema visual, códigos hexadecimales, componentes y accesibilidad. |
-| [Pruebas, límites y cronología](docs/07-PRUEBAS-LIMITES-Y-CRONOLOGIA.md) | Qué verificar, limitaciones conocidas, mantenimiento y tiempo de desarrollo documentable. |
-| [Referencia completa de colores](README-PALETA.md) | Tabla de color y reglas de uso. |
+| Entender la idea sin entrar en código | [01 — Proyecto y alcance](docs/01-PROYECTO-Y-ALCANCE.md) |
+| Entender cómo se conecta todo | [02 — Arquitectura](docs/02-ARQUITECTURA.md) |
+| Saber qué hace cada archivo | [09 — Catálogo del código](docs/09-CATALOGO-DE-CODIGO.md) |
+| Comprender el dispositivo y los parámetros | [04 — Hardware y firmware](docs/04-HARDWARE-Y-FIRMWARE.md) y [17 — Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) |
+| Comprender tablas y datos | [08 — Diccionario de datos](docs/08-DICCIONARIO-DE-DATOS.md) |
+| Comprender el SOS y el correo | [05 — Backend y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md) y [10 — Contratos y flujos API](docs/10-CONTRATOS-Y-FLUJOS-API.md) |
+| Usar la aplicación | [18 — Manual de usuario](docs/18-MANUAL-DE-USUARIO.md) |
+| Instalar o publicar | [12 — Instalación y despliegue](docs/12-INSTALACION-DESPLIEGUE-Y-OPERACION.md) |
+| Investigar un problema | [19 — Manual de mantenimiento](docs/19-MANUAL-DE-MANTENIMIENTO.md) |
+| Preparar y documentar pruebas | [14 — Plan de pruebas](docs/14-PLAN-DE-PRUEBAS-Y-ACEPTACION.md) |
+| Consultar colores y criterios visuales | [06 — Diseño y paleta](docs/06-DISENO-Y-PALETA.md) y [README-PALETA.md](README-PALETA.md) |
 
-## Vista rápida del sistema
+## 2. Índice completo de documentación
+
+Los documentos están numerados para facilitar su lectura en orden. Las afirmaciones técnicas describen el código consultado; los detalles que dependen del proyecto desplegado (por ejemplo, tipos SQL, políticas RLS o entrega final de correo) deben verificarse en ese entorno.
+
+| N.º | Documento | Contenido |
+|---:|---|---|
+| 01 | [Proyecto y alcance](docs/01-PROYECTO-Y-ALCANCE.md) | Idea, necesidad, objetivos, usuarios, alcance, ética y límites. |
+| 02 | [Arquitectura](docs/02-ARQUITECTURA.md) | Capas, diagramas, estructura de carpetas y flujo de datos. |
+| 03 | [Aplicación web](docs/03-APLICACION-WEB.md) | HTML, CSS, módulos JS, navegación, Bluetooth y errores. |
+| 04 | [Hardware y firmware](docs/04-HARDWARE-Y-FIRMWARE.md) | ESP32, MAX30102, pantalla, pines, BLE y pruebas físicas. |
+| 05 | [Backend, datos y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md) | Supabase, tablas, Edge Functions, Resend, RLS y secretos. |
+| 06 | [Diseño y paleta](docs/06-DISENO-Y-PALETA.md) | Identidad visual, HEX, jerarquía, responsive y accesibilidad. |
+| 07 | [Pruebas, límites y cronología](docs/07-PRUEBAS-LIMITES-Y-CRONOLOGIA.md) | Checklist, limitaciones y períodos de trabajo documentados. |
+| 08 | [Diccionario de datos](docs/08-DICCIONARIO-DE-DATOS.md) | Entidades, campos observados, tablas y pendientes de esquema. |
+| 09 | [Catálogo del código](docs/09-CATALOGO-DE-CODIGO.md) | Responsabilidad de cada archivo y sus funciones principales. |
+| 10 | [Contratos y flujos API](docs/10-CONTRATOS-Y-FLUJOS-API.md) | BLE, Supabase, Edge Functions, estados de correo y errores. |
+| 11 | [Diseño UX y accesibilidad](docs/11-DISENO-UX-Y-ACCESIBILIDAD.md) | Navegación, estados, contactos, SOS, responsive y pruebas de uso. |
+| 12 | [Instalación, despliegue y operación](docs/12-INSTALACION-DESPLIEGUE-Y-OPERACION.md) | Requisitos, servidor estático, Supabase, Resend, firmware y diagnóstico. |
+| 13 | [Seguridad, privacidad y riesgos](docs/13-SEGURIDAD-PRIVACIDAD-Y-RIESGOS.md) | Activos, amenazas, RLS, datos sensibles y mitigaciones. |
+| 14 | [Plan de pruebas y aceptación](docs/14-PLAN-DE-PRUEBAS-Y-ACEPTACION.md) | Casos AUTH, contactos, BLE, historial, SOS, correo y aceptación. |
+| 15 | [Decisiones técnicas y cambios](docs/15-DECISIONES-TECNICAS-Y-CAMBIOS.md) | Decisiones de arquitectura, historial y plantilla de bitácora. |
+| 16 | [Glosario y referencias](docs/16-GLOSARIO-Y-REFERENCIAS.md) | Terminología y documentación primaria de las tecnologías. |
+| 17 | [Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) | Constantes, pines, funciones, algoritmo de LPM y ciclo de ejecución. |
+| 18 | [Manual de usuario](docs/18-MANUAL-DE-USUARIO.md) | Cómo acceder, conectar, leer, consultar historial, contactos y SOS. |
+| 19 | [Manual de mantenimiento](docs/19-MANUAL-DE-MANTENIMIENTO.md) | Diagnóstico por capas, publicación, recuperación y evidencia. |
+| — | [Referencia rápida de colores](README-PALETA.md) | Paleta visual resumida. |
+
+## 3. Cómo funciona el sistema
 
 ```mermaid
-flowchart LR
-    S[MAX30102] --> F[Firmware ESP32]
-    F --> D[Pantalla ST7789]
-    F <-->|Bluetooth Low Energy| W[Aplicación web]
-    W --> A[Supabase Auth]
-    W --> DB[(PostgreSQL / Supabase)]
-    W --> E[Edge Functions]
-    E --> R[Resend]
-    R --> C[Correo del contacto]
+flowchart TD
+  S[MAX30102: señal óptica] --> F[ESP32: firmware]
+  F --> L[Pantalla ST7789]
+  F <-->|BLE / GATT| W[Aplicación web]
+  W --> AU[Supabase Auth]
+  W --> DB[(PostgreSQL / Supabase)]
+  W --> EF[Edge Functions]
+  EF --> DB
+  EF --> R[Resend]
+  R --> C[Correo del contacto]
 ```
 
-El enlace BLE transporta lecturas del dispositivo a la web. Supabase se usa para autenticación y persistencia. La función `amar-sos` registra una alerta y, si está configurado Resend y existen destinatarios, intenta enviar un correo. La función `amar-email` permite enviar una plantilla a un contacto concreto cuando se utiliza ese flujo.
+1. El MAX30102 genera muestras ópticas.
+2. El firmware procesa la señal, estima LPM, valida antigüedad/estado y actualiza la pantalla.
+3. El ESP32 publica un mensaje BLE.
+4. La web recibe el mensaje, actualiza el panel y, cuando corresponde, guarda la lectura.
+5. El usuario consulta el historial almacenado.
+6. Si se solicita SOS, la web invoca el servidor; la función valida sesión, registra la alerta y puede solicitar a Resend el envío de correo.
+7. El correo aceptado por el proveedor no garantiza entrega a bandeja, lectura ni respuesta.
 
-## Funciones principales
-
-- Crear una cuenta e iniciar/cerrar sesión.
-- Configurar un perfil personal.
-- Vincular el dispositivo compatible por Bluetooth.
-- Ver las LPM recibidas, el estado de conexión y la hora de la última lectura.
-- Guardar y consultar mediciones e historial por fecha.
-- Gestionar dispositivos y contactos de emergencia.
-- Registrar una solicitud SOS manual y gestionar una alerta automática del flujo implementado.
-- Adjuntar ubicación cuando el usuario concede permiso y el navegador la obtiene.
-- Notificar contactos por correo mediante el backend cuando la configuración está activa.
-- Abrir el teléfono o WhatsApp para que la persona complete la comunicación manualmente.
-
-## Stack tecnológico
+## 4. Tecnologías y responsabilidades
 
 | Capa | Tecnología | Responsabilidad |
 |---|---|---|
-| Interfaz | HTML5 | Estructura semántica de vistas, paneles, formularios y modales. |
-| Presentación | CSS3 | Diseño responsive, estados, animaciones y paleta. |
-| Lógica cliente | JavaScript | Navegación SPA, validación, CRUD, historial, BLE y SOS. |
-| Autenticación y datos | Supabase Auth + PostgreSQL | Identidad, acceso a datos y persistencia. |
-| Funciones de servidor | Supabase Edge Functions / Deno | Lógica protegida de alertas y correo. |
-| Envío de correo | Resend API | Transporte de mensajes desde el servidor. |
-| Dispositivo | Arduino/C++ sobre ESP32 | Lectura del MAX30102, pantalla y servidor BLE. |
-| Pantalla del dispositivo | ST7789, 170 × 320 | Estado local del sensor y del prototipo. |
-| Sensor | MAX30102 | Sensor óptico usado para estimar la frecuencia del pulso. |
+| Estructura web | HTML5 | Vistas, formularios, tarjetas y diálogos. |
+| Presentación | CSS3 | Paleta, layout, estados, responsive y animaciones. |
+| Lógica cliente | JavaScript | Navegación, CRUD, historial, BLE, validación y SOS. |
+| Autenticación | Supabase Auth | Identidad y sesión. |
+| Persistencia | PostgreSQL mediante Supabase | Datos de perfil, lecturas, dispositivos, contactos, ubicaciones y alertas. |
+| Operaciones protegidas | Supabase Edge Functions / Deno | Registro SOS y lógica de correo del servidor. |
+| Correo | Resend API | Procesamiento de solicitudes de envío. |
+| Firmware | Arduino/C++ en ESP32 | Sensor, estimación, pantalla y servidor BLE. |
+| Sensor | MAX30102 | Fuente óptica de datos relacionados con el pulso. |
+| Pantalla | ST7789, 170 × 320 | Estado y lectura local del dispositivo. |
 
-## Principios del proyecto
+## 5. Estructura principal del repositorio
 
-1. **Separación de responsabilidades:** sensor y firmware adquieren/procesan; la web presenta y registra; Supabase autentica y persiste; las funciones del servidor realizan operaciones protegidas.
-2. **Privacidad:** no se debe incluir una clave privada de Resend ni secretos del servidor en JavaScript público.
-3. **Permisos explícitos:** ubicación y Bluetooth dependen del navegador, del sistema operativo y de la autorización del usuario.
-4. **Transparencia:** la interfaz debe distinguir una alerta registrada, un correo aceptado por el proveedor y una comunicación humana efectivamente recibida.
-5. **Accesibilidad:** no depender exclusivamente del color y respetar la preferencia de movimiento reducido.
-6. **Alcance sanitario prudente:** una lectura aislada o un estado visual no constituye diagnóstico.
+```text
+Aplicacion_AMAR/
+├── index.html
+├── style.css
+├── supabase-config.js
+├── app.js
+├── Completop.ino
+├── package.json / package-lock.json
+├── README.md
+├── README-PALETA.md
+├── js/
+│   ├── core.js
+│   ├── auth.js
+│   ├── dashboard.js
+│   ├── bluetooth.js
+│   ├── devices.js
+│   ├── contacts.js
+│   ├── history.js
+│   ├── profile.js
+│   └── alerts.js
+├── supabase/
+│   ├── config.toml
+│   └── functions/
+│       ├── amar-email/index.ts
+│       └── amar-sos/index.ts
+└── docs/
+    ├── 01…19 documentos especializados
+```
 
-## Configuración resumida
+Para la descripción archivo por archivo y las dependencias de carga, consultar [09 — Catálogo del código](docs/09-CATALOGO-DE-CODIGO.md). El árbol se debe actualizar si se agregan, eliminan o renombran archivos.
 
-La web carga la configuración pública de Supabase desde `supabase-config.js`. La URL y la clave *anon/publishable* son valores de cliente; la seguridad de los datos debe estar reforzada con políticas RLS. Las claves privadas deben permanecer como secretos del proyecto Supabase.
+## 6. Funciones de usuario
 
-Para envío de correo mediante Resend, configurar los secretos del proyecto y desplegar las funciones correspondientes. Ver [Backend, datos y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md).
+- Crear cuenta, iniciar sesión y cerrar sesión.
+- Consultar el dashboard y el estado de la conexión.
+- Vincular un dispositivo compatible por BLE.
+- Mostrar la lectura recibida en LPM y su hora.
+- Guardar lecturas para consultar el historial.
+- Administrar perfil, dispositivos y contactos de emergencia.
+- Consultar calendario y resúmenes de lecturas.
+- Solicitar una alerta SOS y, con permisos disponibles, adjuntar ubicación.
+- Intentar notificar contactos por correo desde el servidor si Resend está configurado.
+- Abrir teléfono/WhatsApp para que el usuario complete la comunicación manualmente.
 
-## Documentación del tiempo de desarrollo
+En “Mis contactos de emergencia”, las acciones son **Llamar**, **Editar** y **Eliminar**. El botón **Correo** fue retirado porque abría un enlace `mailto:` y dependía de una aplicación local. La dirección de correo se conserva como dato para el flujo SOS del servidor.
 
-El historial de trabajo documentado permite situar avances funcionales durante **octubre de 2026**, con cambios de firmware, Bluetooth, historial, SOS y correo. El repositorio por sí solo no demuestra las horas efectivas de trabajo; por eso no se inventa una cantidad de horas. El documento [Pruebas, límites y cronología](docs/07-PRUEBAS-LIMITES-Y-CRONOLOGIA.md) diferencia las fechas de actividad que pueden respaldarse del tiempo efectivo que requiere un registro horario.
+## 7. Configuración resumida
 
-## Aviso importante
+### Frontend
+La aplicación carga la URL de Supabase y la clave pública desde `supabase-config.js`. Esa clave no es una clave administrativa: la protección real de las filas depende de RLS y de la autorización del servidor.
 
-Este proyecto es un prototipo académico. No debe usarse como único mecanismo de seguridad, no sustituye atención profesional y no garantiza que un contacto lea o responda un correo. Ante una emergencia real, contactar directamente al servicio de emergencias local.
+### Edge Functions y Resend
+Los secretos privados se configuran en Supabase, no en archivos públicos:
+
+```bash
+supabase secrets set RESEND_API_KEY=tu_clave_resend RESEND_FROM_EMAIL="A.M.A.R. <alertas@tu-dominio.com>"
+supabase functions deploy amar-sos
+supabase functions deploy amar-email
+```
+
+Usar un remitente autorizado por Resend y un proyecto Supabase correcto. Los pasos completos están en [12 — Instalación y despliegue](docs/12-INSTALACION-DESPLIEGUE-Y-OPERACION.md).
+
+## 8. Seguridad, privacidad y límites médicos
+
+- RLS debe limitar cada tabla al usuario propietario; el filtrado en JavaScript no es suficiente.
+- No guardar claves privadas, tokens o credenciales administrativas en GitHub.
+- La ubicación es sensible y depende del permiso del usuario.
+- El correo no es un canal garantizado de emergencia.
+- El estado de la aplicación no prueba por sí solo que un contacto recibió ayuda.
+- La onda animada es decorativa, no un ECG.
+- El algoritmo de LPM no está clínicamente validado en este repositorio.
+- No usar el prototipo para diagnosticar ni tomar decisiones de tratamiento.
+
+Ver [13 — Seguridad y riesgos](docs/13-SEGURIDAD-PRIVACIDAD-Y-RIESGOS.md).
+
+## 9. Verificación antes de una demostración
+
+- [ ] Acceso y cierre de sesión.
+- [ ] CRUD de perfil, dispositivos y contactos.
+- [ ] Prueba de acceso cruzado con dos usuarios de prueba.
+- [ ] Conexión BLE y desconexión.
+- [ ] Lectura válida y dato obsoleto.
+- [ ] Persistencia e historial.
+- [ ] SOS sin ubicación.
+- [ ] SOS con correo configurado y sin configurar.
+- [ ] Revisión de eventos de Resend, sin asumir que “aceptado” equivale a “leído”.
+- [ ] Prueba móvil y escritorio.
+- [ ] Firmware, commit y entorno desplegado anotados.
+
+La matriz completa está en [14 — Plan de pruebas](docs/14-PLAN-DE-PRUEBAS-Y-ACEPTACION.md).
+
+## 10. Cronología y horas de trabajo
+
+El contexto documentado sitúa avances de firmware, interfaz, Bluetooth, historial y SOS durante septiembre y octubre de 2026. El historial de Git y las conversaciones permiten registrar fechas de hitos, pero **no demuestran el total de horas efectivas trabajadas**. Para informar una cifra académica, completar la bitácora con hora de inicio, fin, actividad y evidencia real. No se debe calcular tiempo de trabajo a partir del número de commits.
+
+## 11. Criterio de documentación viva
+
+Cuando cambie algo, actualizar los documentos relacionados en el mismo cambio:
+- Pines, umbrales o algoritmo → docs 04 y 17.
+- Mensaje BLE o UUID → docs 02, 10 y 17, además de firmware/cliente.
+- Tabla/columna o política → docs 05, 08 y 13.
+- Botón o interacción → docs 03, 06 y 11.
+- SOS/correo → docs 05, 10, 13 y 14.
+- Requisitos de instalación → docs 12 y 19.
+- Decisión arquitectónica → docs 15.
+
+## 12. Aviso importante
+
+Este repositorio describe un prototipo académico, no un dispositivo médico certificado. Ante una emergencia real, contactar directamente a los servicios de emergencia locales. No depender de A.M.A.R. como único mecanismo de seguridad.
