@@ -29,7 +29,11 @@ La documentación completa se encuentra en el [README principal](../README.md).
 21. [Memoria descriptiva académica](21-MEMORIA-DESCRIPTIVA-PARA-PRESENTACION.md)
 22. [Requisitos funcionales y no funcionales](22-REQUISITOS-FUNCIONALES-Y-NO-FUNCIONALES.md)
 23. [Pendientes y deuda técnica](23-PENDIENTES-Y-DEUDA-TECNICA.md)
+24. [Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md)
+25. [Estado actual y bitácora técnica](25-ESTADO-ACTUAL-Y-BITACORA.md)
 
-Los documentos 24 y 25 consolidan la lógica del firmware canónico v5.3 y la arquitectura actual. El firmware se mantiene en el repositorio separado [ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030); la copia v4.1 que aparece en este repositorio web es histórica.\n\n## Nota sobre exactitud
+Los documentos 24 y 25 consolidan la lógica del firmware canónico v5.3 y la arquitectura actual. El firmware se mantiene en el repositorio separado [ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030); la copia v4.1 que aparece en este repositorio web es histórica.
+
+## Nota sobre exactitud
 
 Los documentos explican el código del repositorio y separan hechos observados de recomendaciones. Los detalles de esquema, políticas RLS, configuración de despliegue y entrega final de correo deben contrastarse con los servicios desplegados. Nunca registrar secretos ni datos personales reales en la documentación.
