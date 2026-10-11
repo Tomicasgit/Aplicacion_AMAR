@@ -2,6 +2,8 @@
 
 La documentación completa se encuentra en el [README principal](../README.md).
 
+- **[Catálogo integral de mejoras y hoja de ruta](../README-MEJORAS.md):** mejoras posibles sin limitarse al estado actual, con explicación de implementación, prioridades, riesgos, pruebas, backlog y plan por etapas.
+
 ## Lectura técnica
 
 1. [Proyecto y alcance](01-PROYECTO-Y-ALCANCE.md)
