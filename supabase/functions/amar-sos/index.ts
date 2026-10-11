@@ -63,6 +63,10 @@ Deno.serve(async (req: Request) => {
     type?: string;
     message?: string;
     device_id?: string;
+    location?: {
+      latitude?: number;
+      longitude?: number;
+    } | null;
   };
 
   try {
@@ -83,6 +87,21 @@ Deno.serve(async (req: Request) => {
       : body.type === "manual_sos"
         ? "Solicitud manual de SOS"
         : "Solicitud automática de SOS";
+
+  // La ubicación es opcional: un permiso denegado nunca debe bloquear el SOS.
+  const location =
+    body.location &&
+    Number.isFinite(body.location.latitude) &&
+    Number.isFinite(body.location.longitude) &&
+    body.location.latitude! >= -90 &&
+    body.location.latitude! <= 90 &&
+    body.location.longitude! >= -180 &&
+    body.location.longitude! <= 180
+      ? {
+          latitude: body.location.latitude!,
+          longitude: body.location.longitude!,
+        }
+      : null;
 
   const { data: alert, error: insertError } = await supabase
     .from("alerts")
@@ -142,6 +161,9 @@ Deno.serve(async (req: Request) => {
       `Usuario: ${profile?.name || userData.user.email || "Usuario A.M.A.R."}`,
       `Tipo: ${body.type === "manual_sos" ? "Solicitud manual de ayuda" : "Alerta automática"}`,
       `Detalle: ${message}`,
+      location
+        ? `Ubicación: https://www.google.com/maps?q=${location.latitude},${location.longitude}`
+        : "Ubicación: no disponible o sin permiso.",
       `Fecha: ${new Date(alert.created_at).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}`,
       "",
       "Esta notificación no confirma que el usuario esté recibiendo atención médica. Si corresponde, comunicate directamente con él.",
