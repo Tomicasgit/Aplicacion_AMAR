@@ -315,6 +315,22 @@
 
       await characteristic.startNotifications();
 
+      // Sin Wi-Fi, el navegador sincroniza el reloj del ESP32 al conectar.
+      try {
+        const timestampPayload = new TextEncoder().encode(
+          JSON.stringify({ timestamp: new Date().toISOString() })
+        );
+
+        if (typeof characteristic.writeValueWithResponse === 'function') {
+          await characteristic.writeValueWithResponse(timestampPayload);
+        } else {
+          await characteristic.writeValue(timestampPayload);
+        }
+      } catch (timeError) {
+        // La conexión y las lecturas siguen disponibles aunque falle la sincronización horaria.
+        console.warn('No se pudo sincronizar la hora del ESP32:', timeError);
+      }
+
       setConnectionStatus('Conectado');
       console.info('Bluetooth conectado:', device.name);
 
