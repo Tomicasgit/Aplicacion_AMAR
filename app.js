@@ -35,7 +35,11 @@
         </div>
         <div class="field">
           <label>Teléfono</label>
-          <input id="contactPhone" required>
+          <input id="contactPhone" type="tel" autocomplete="tel" required>
+        </div>
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input id="contactEmail" type="email" autocomplete="email" required>
         </div>
         <div class="field">
           <label>Relación</label>
@@ -96,10 +100,11 @@
           const userId = authData.user.id;
           const name = $('#contactName').value.trim();
           const phone = $('#contactPhone').value.trim();
+          const email = $('#contactEmail').value.trim();
           const relationship = $('#contactRelation').value.trim();
 
-          if (!name || !phone) {
-            throw new Error('Completá el nombre y el teléfono del contacto.');
+          if (!name || !phone || !email) {
+            throw new Error('Completá el nombre, el teléfono y el correo del contacto.');
           }
 
           const { error } = await supabaseClient
@@ -108,6 +113,7 @@
               user_id: userId,
               name,
               phone,
+              email,
               relationship: relationship || null
             });
 
