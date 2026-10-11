@@ -121,7 +121,6 @@
     }
 
     savingReading = true;
-    lastReadingAttemptAt = Date.now();
 
     try {
       const parsedDate = data.timestamp ? Date.parse(data.timestamp) : NaN;
@@ -140,6 +139,9 @@
 
       if (error) throw error;
 
+      // Limitar la frecuencia solo después de una inserción exitosa.
+      // Si Supabase rechaza la fila, la siguiente lectura válida puede reintentar.
+      lastReadingAttemptAt = Date.now();
       readingErrorShown = false;
 
       // Recargar el historial desde la base para reflejar solo filas realmente guardadas.
