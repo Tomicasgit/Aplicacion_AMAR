@@ -1,88 +1,63 @@
-async function editProfile() {
-  try {
-    const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser();
-
-    if (authError) throw authError;
-
-    const user = authData.user;
-
-    if (!user) {
-      alert('Debes iniciar sesión.');
-      return;
-    }
-
-    const { data: profile, error } = await supabaseClient
-      .from('profiles')
-      .select('name')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    openModal(`
-      <h2>Editar perfil</h2>
-      <form id="editProfileForm">
-        <label for="profileName">Nombre completo</label>
-        <input
-          id="profileName"
-          type="text"
-          maxlength="100"
-          required
-          placeholder="Tu nombre"
-        >
-        <div class="form-actions">
-          <button type="button" class="secondary"
-            onclick="closeModal()">Cancelar</button>
-          <button type="submit" class="primary">Guardar cambios</button>
-        </div>
-        <p id="profileMessage" class="message"></p>
-      </form>
-    `);
-
-    $('#profileName').value =
-      profile?.name || user.user_metadata?.name || '';
-
-    $('#editProfileForm').onsubmit = async event => {
-      event.preventDefault();
-
-      const name = $('#profileName').value.trim();
-
-      if (!name) {
-        message('#profileMessage', 'Ingresá tu nombre.');
-        return;
-      }
-
-      const { data: updatedProfiles, error: saveError } =
-        await supabaseClient
-          .from('profiles')
-          .update({ name })
-          .eq('id', user.id)
-          .select('id');
-
-      if (saveError) {
-        console.error('Error al guardar el perfil:', saveError);
-        message(
-          '#profileMessage',
-          'No se pudo guardar el nombre. Intentá nuevamente.'
-        );
-        return;
-      }
-
-      if (!updatedProfiles || updatedProfiles.length === 0) {
-        message(
-          '#profileMessage',
-          'No se actualizó el perfil. Verificá que exista y que tengas permiso para modificarlo.'
-        );
-        return;
-      }
-
-      closeModal();
-      await loadDashboard(user);
-
-    };
-  } catch (error) {
-    console.error('Error al editar el perfil:', error);
-    alert('No se pudo abrir la edición del perfil.');
-  }
+let currentProfileUser = null;
+function applyUserTheme(theme = 'system') {
+  const resolved = theme === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+  document.documentElement.dataset.theme = resolved;
 }
+function fillProfileForm(user) {
+  if (!user) return;
+  const meta = user.user_metadata || {};
+  $('#profileName').value = meta.name || meta.full_name || '';
+  $('#profileEmail').value = user.email || '';
+  $('#profilePhone').value = meta.phone || '';
+  $('#profileBirthdate').value = meta.birthdate || '';
+  $('#profileCity').value = meta.city || '';
+  $('#profileTheme').value = ['light','dark','system'].includes(meta.theme) ? meta.theme : 'system';
+  $('#profileHeading').textContent = meta.name || meta.full_name || 'Mi perfil';
+  $('#profileAvatar').textContent = (meta.name || meta.full_name || user.email || 'A').trim().charAt(0).toUpperCase();
+  applyUserTheme($('#profileTheme').value);
+}
+async function editProfile() {
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error) throw error;
+  if (!data.user) return show('loginView');
+  currentProfileUser = data.user; fillProfileForm(data.user); show('appView');
+  document.querySelector('[data-panel="profileSection"]')?.click();
+}
+$('#profileForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!currentProfileUser) {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error) return message('#profileMessage', 'No se pudo recuperar tu sesión.');
+    currentProfileUser = data.user;
+  }
+  if (!currentProfileUser) return message('#profileMessage', 'Iniciá sesión para editar tu perfil.');
+  const button = $('#profileForm button[type="submit"]'); button.disabled = true;
+  message('#profileMessage', '');
+  const name = $('#profileName').value.trim();
+  const metadata = { ...currentProfileUser.user_metadata, name,
+    phone: $('#profilePhone').value.trim(), birthdate: $('#profileBirthdate').value,
+    city: $('#profileCity').value.trim(), theme: $('#profileTheme').value };
+  try {
+    const { data, error } = await supabaseClient.auth.updateUser({ data: metadata });
+    if (error) throw error;
+    currentProfileUser = data.user || { ...currentProfileUser, user_metadata: metadata };
+    const { error: profileError } = await supabaseClient.from('profiles').update({ name }).eq('id', currentProfileUser.id);
+    if (profileError) console.warn('Datos de cuenta guardados; no se pudo sincronizar profiles.name:', profileError);
+    applyUserTheme(metadata.theme);
+    $('#patientName').textContent = name || 'Paciente';
+    $('#profileHeading').textContent = name || 'Mi perfil';
+    $('#profileAvatar').textContent = (name || currentProfileUser.email || 'A').trim().charAt(0).toUpperCase();
+    message('#profileMessage', profileError ? 'Preferencias guardadas. El nombre puede tardar en actualizarse en el panel.' : 'Cambios guardados correctamente.', true);
+  } catch (error) { message('#profileMessage', error.message || 'No se pudieron guardar los cambios.'); }
+  finally { button.disabled = false; }
+});
+$('#profileTheme')?.addEventListener('change', event => applyUserTheme(event.target.value));
+$('#resetProfile')?.addEventListener('click', async () => {
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error || !data.user) return message('#profileMessage', 'No se pudo recuperar tu perfil.');
+  currentProfileUser = data.user; fillProfileForm(data.user); message('#profileMessage', '');
+});
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data } = await supabaseClient.auth.getUser();
+  if (data?.user) { currentProfileUser = data.user; fillProfileForm(data.user); }
+});
