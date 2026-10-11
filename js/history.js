@@ -255,3 +255,12 @@ let heartReadings = [];
       selectedCalendarDate = button.dataset.calendarDate;
       renderCalendar();
     });
+
+document.querySelector('#toggleDailySummary')?.addEventListener('click', event => {
+  const button = event.currentTarget, summary = document.querySelector('#dailySummary');
+  if (!summary) return;
+  const expanded = button.getAttribute('aria-expanded') !== 'true';
+  summary.classList.toggle('daily-summary-collapsed', !expanded);
+  button.setAttribute('aria-expanded', String(expanded));
+  button.innerHTML = expanded ? 'Mostrar resumen compacto <span aria-hidden="true">↑</span>' : 'Ver todas las estadísticas <span aria-hidden="true">↓</span>';
+});
