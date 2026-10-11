@@ -216,13 +216,28 @@ let heartReadings = [];
       const container = $('#historyList');
       if (container) container.innerHTML = '<p class="empty">Cargando historial...</p>';
 
-      const { data, error } = await supabaseClient
-        .from('heart_readings')
-        .select('lpm, recorded_at')
-        .eq('user_id', userId)
-        .order('recorded_at', { ascending: true });
+      // Supabase limita cada respuesta; paginar evita truncar el historial a 1.000 filas.
+      const pageSize = 1000;
+      let offset = 0;
+      const allReadings = [];
 
-      if (error) {
+      try {
+        while (true) {
+          const { data, error } = await supabaseClient
+            .from('heart_readings')
+            .select('lpm, recorded_at')
+            .eq('user_id', userId)
+            .order('recorded_at', { ascending: true })
+            .range(offset, offset + pageSize - 1);
+
+          if (error) throw error;
+          const page = data || [];
+          allReadings.push(...page);
+
+          if (page.length < pageSize) break;
+          offset += pageSize;
+        }
+      } catch (error) {
         console.error('Error al cargar el historial:', error);
         if (container) container.innerHTML = '<p class="empty">No se pudo cargar el historial.</p>';
         const summary = $('#calendarSummary');
@@ -230,7 +245,7 @@ let heartReadings = [];
         return;
       }
 
-      heartReadings = data || [];
+      heartReadings = allReadings;
       selectedCalendarDate = localDateKey(new Date());
       calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
       renderDailySummary();
