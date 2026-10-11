@@ -61,17 +61,19 @@ Al cambiar CSS/JS, actualizar el parámetro de versión de caché en el HTML pue
 
 ## 6. Firmware
 
-1. Abrir `Completop.ino`.
+El firmware vigente se encuentra en el repositorio separado [Tomicasgit/ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030), archivo [`Completop.ino`](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/Completop.ino), versión declarada v5.3. La copia `Completop.ino` de este repositorio web declara v4.1 y es histórica.
+
+1. Descargar/abrir el sketch desde el repositorio canónico de firmware.
 2. Instalar las bibliotecas indicadas por los `#include`.
-3. Seleccionar el modelo exacto de placa ESP32.
+3. Seleccionar el modelo exacto de placa IdeaSpark ESP32.
 4. Verificar pines con el hardware real.
 5. Compilar antes de cargar.
 6. Cargar con el puerto correcto.
-7. Abrir monitor serie si el firmware emite diagnósticos.
+7. Abrir el monitor serie a 115200 baudios.
 8. Verificar pantalla, sensor y BLE por separado.
-9. Registrar versión y resultado.
+9. Registrar commit, versiones de bibliotecas y resultado real.
 
-Los nombres exactos de bibliotecas y ajustes deben tomarse del sketch actual y de la revisión de placa utilizada; no asumir que una opción de otra placa ESP32 es intercambiable.
+La explicación completa está en [24 — Referencia del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md) y en la [guía de montaje y pruebas del repositorio de firmware](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/docs/03-MONTAJE-CARGA-Y-PRUEBAS.md). No asumir que una opción de otra placa ESP32 es intercambiable.
 
 ## 7. Operación y monitoreo
 
