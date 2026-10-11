@@ -78,3 +78,17 @@ Calcular las horas efectivas sumando únicamente intervalos reales registrados. 
 - Al cambiar tablas, actualizar diccionario de datos y seguridad.
 - Al cambiar formato BLE, actualizar contrato, firmware y cliente.
 - Al cambiar un flujo de correo, actualizar estados, plantilla y pruebas.
+
+
+## Decisión vigente: repositorios separados para web y firmware
+
+**Estado:** vigente.
+
+- La aplicación estática y las funciones/configuración asociadas permanecen en [`Aplicacion_AMAR`](https://github.com/Tomicasgit/Aplicacion_AMAR).
+- El sketch del dispositivo se mantiene como fuente canónica en [`ESP32_Proyecto2030/Completop.ino`](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/Completop.ino), versión declarada v5.3.
+- La copia v4.1 que permanece en el repo web es histórica y no debe confundirse con el firmware actual.
+- El ESP32 utiliza BLE y no Wi-Fi; la aplicación web envía el timestamp ISO 8601 al firmware.
+- El dashboard del firmware canónico utiliza la paleta clara/coral y presenta LPM, promedio, calidad, estado del sensor, BLE y hora.
+- Los cambios en UUID o JSON requieren actualizar firmware y `js/bluetooth.js` en coordinación.
+
+La documentación completa de la lógica, variables, funciones, estados y parámetros está en [24 — Referencia del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md). Las pruebas físicas y de extremo a extremo deben anotarse como evidencia independiente; un commit de código no demuestra que una prueba se haya ejecutado.
