@@ -1,28 +1,37 @@
-# A.M.A.R. — API inicial
+# A.M.A.R. — Alerta de Latidos y Monitoreo Autónomo
 
-API PHP + MySQL/MariaDB para guardar los datos del sistema **Alerta de Latidos y Monitoreo Autónomo**. Es una base de desarrollo: no diagnostica enfermedades ni sustituye atención médica.
+A.M.A.R. es un prototipo de monitoreo de frecuencia cardíaca compuesto por una aplicación web y un dispositivo basado en ESP32.
 
-## Inicio rápido
+La aplicación permite gestionar usuarios, perfiles, dispositivos vinculados, contactos de emergencia, historial de mediciones, ubicaciones y alertas.
 
-1. Creá la base ejecutando `mysql -u root -p < database.sql`.
-2. Configurá credenciales en variables `AMAR_DB_HOST`, `AMAR_DB_NAME`, `AMAR_DB_USER` y `AMAR_DB_PASS`, o editá `api/config.php` para uso local.
-3. Desde la carpeta del proyecto, iniciá el servidor: `php -S localhost:8000`.
-4. La API queda disponible en `http://localhost:8000/api/index.php?action=...`.
+> A.M.A.R. es un prototipo de monitoreo. No diagnostica enfermedades ni reemplaza la atención médica profesional.
 
-## Endpoints
+## Tecnologías
 
-Todos reciben y devuelven JSON. Para endpoints protegidos se utiliza `Authorization: Bearer TOKEN`.
+- HTML, CSS y JavaScript.
+- Supabase Auth y base de datos PostgreSQL.
+- Bluetooth Low Energy (BLE) para la comunicación con el dispositivo.
+- Arduino para el firmware del ESP32.
 
-| Acción | Método | Autorización | Función |
-|---|---|---|---|
-| `register` | POST | No | Crea paciente/usuario y devuelve token. |
-| `login` | POST | No | Inicia sesión y devuelve token. |
-| `contacts` | GET/POST | Token de usuario | Consulta o agrega contactos de emergencia. |
-| `devices` | GET/POST | Token de usuario | Lista o vincula un ESP32 y devuelve su clave una sola vez. |
-| `dashboard` | GET | Token de usuario | Devuelve última lectura, alerta y estado de dispositivo. |
-| `reading` | POST | Clave ESP32 | Guarda `{ "bpm": 76 }`. |
-| `location` | POST | Clave ESP32 | Guarda `{ "latitude": -34.60, "longitude": -58.38 }`. |
-| `device-status` | POST | Clave ESP32 | Actualiza `{ "status": "online" }`. |
-| `alert` | POST | Clave ESP32 | Guarda alerta `panic`, `high_heart_rate` o `device`. |
+## Aplicación web
 
-Para vincular un ESP32, iniciá sesión y enviá `POST` a `devices` con `{ "name": "Mi ESP32" }`. La respuesta devuelve `device_key` **una única vez**: guardala en el firmware y enviala como Bearer token desde el dispositivo. BLE se gestiona entre el ESP32 y la aplicación cliente; el ESP32 envía luego los datos a esta API por Wi‑Fi/Internet.
+La interfaz principal se encuentra en `index.html`, con estilos en `style.css` y lógica general en `app.js`.
+
+Los módulos de `js/` separan las funciones de autenticación, perfiles, dispositivos, contactos, historial, panel principal, alertas y Bluetooth.
+
+La configuración pública del cliente Supabase se encuentra en `supabase-config.js`. Las claves secretas nunca deben incluirse en el código del navegador.
+
+## Firmware
+
+`Completop.ino` contiene el firmware del dispositivo. El hardware y sus conexiones deben verificarse en el propio código antes de modificarlo.
+
+## Publicación
+
+La aplicación web está preparada para publicarse como sitio estático, por ejemplo mediante GitHub Pages. La autenticación y los datos dependen de la configuración del proyecto Supabase y de sus políticas de seguridad.
+
+## Seguridad y privacidad
+
+- Las tablas deben mantener políticas RLS adecuadas para restringir el acceso a los datos de cada usuario.
+- No publicar claves secretas de Supabase.
+- Probar el flujo de alertas en modo controlado para evitar notificaciones de emergencia involuntarias.
+- La ubicación y las mediciones cardíacas son datos sensibles y deben tratarse con cuidado.
