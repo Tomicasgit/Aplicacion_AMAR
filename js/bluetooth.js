@@ -157,15 +157,14 @@
     );
 
     try {
-      const json = new TextDecoder().decode(bytes).replace(/\\0+$/g, '').trim();
+      const json = new TextDecoder().decode(bytes).trim();
       if (!json.startsWith('{')) return;
       const data = JSON.parse(json);
-      lastTelemetryAt = Date.now();
       const signature = JSON.stringify(data);
-      if (signature !== lastPayloadSignature) {
-        lastPayloadSignature = signature;
-        console.info('A.M.A.R. — telemetría recibida por ' + source + '.', data);
-      }
+      if (signature === lastPayloadSignature) return;
+      lastPayloadSignature = signature;
+      lastTelemetryAt = Date.now();
+      console.info('A.M.A.R. — telemetría recibida por ' + source + '.', data);
 
       if (window.AMARAlerts?.processReading) {
         const resultado = window.AMARAlerts.processReading(data);
