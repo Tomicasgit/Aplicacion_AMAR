@@ -196,12 +196,30 @@
           ? `<a class="email-button" href="mailto:${escapeContactHTML(email)}?subject=${encodeURIComponent("Alerta A.M.A.R.")}&body=${encodeURIComponent("Necesito que te comuniques conmigo. Revisá mi situación, por favor.")}">Redactar correo</a>`
           : "";
 
-        const whatsappPhone = phone.replace(/\D/g, "");
+        // WhatsApp necesita el número en formato internacional, solo con dígitos.
+        let whatsappPhone = phone.replace(/\D/g, "");
+        if (whatsappPhone.startsWith("00")) {
+          whatsappPhone = whatsappPhone.slice(2);
+        }
+        // Los números argentinos locales suelen tener 10 dígitos.
+        // Para WhatsApp móvil se usa el prefijo internacional 549.
+        if (whatsappPhone && !whatsappPhone.startsWith("54")) {
+          if (whatsappPhone.startsWith("0")) {
+            whatsappPhone = whatsappPhone.slice(1);
+          }
+          if (whatsappPhone.length === 10) {
+            whatsappPhone = `549${whatsappPhone}`;
+          } else if (whatsappPhone.length === 11 && whatsappPhone.startsWith("15")) {
+            whatsappPhone = `549${whatsappPhone.slice(2)}`;
+          } else {
+            whatsappPhone = `54${whatsappPhone}`;
+          }
+        }
         const whatsappMessage = encodeURIComponent(
           "EMERGENCIA A.M.A.R.: necesito ayuda. Por favor, comunicate conmigo."
         );
-        const whatsappLink = whatsappPhone
-          ? `<a class="whatsapp-button" href="https://wa.me/${whatsappPhone}?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`
+        const whatsappLink = whatsappPhone.length >= 10
+          ? `<a class="whatsapp-button" href="https://wa.me/${whatsappPhone}?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp a ${name}">WhatsApp</a>`
           : "";
 
         return `
