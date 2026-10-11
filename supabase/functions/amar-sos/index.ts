@@ -102,25 +102,103 @@ Deno.serve(async (req: Request) => {
 
   const { data: contacts, error: contactsError } = await supabase
     .from("emergency_contacts")
-    .select("id")
+    .select("id, name, email")
     .eq("user_id", userData.user.id);
 
   if (contactsError) {
-    console.error("No se pudieron consultar los contactos");
+    console.error("No se pudieron consultar los contactos:", contactsError.message);
     return respond({
       success: true,
       alert,
       contacts_checked: false,
-      message: "Alerta registrada; no se pudieron consultar los contactos",
       communications_sent: false,
+      message: "La alerta quedó registrada, pero no se pudieron consultar los contactos.",
     });
+  }
+
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  const fromEmail = Deno.env.get("RESEND_FROM_EMAIL");
+  const emailContacts = (contacts ?? []).filter(
+    (contact) => typeof contact.email === "string" && contact.email.trim()
+  );
+
+  let emailSentCount = 0;
+  let emailFailedCount = 0;
+  let emailConfigured = Boolean(resendApiKey && fromEmail);
+
+  if (emailConfigured && emailContacts.length > 0) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+
+    const subject = body.type === "manual_sos"
+      ? "A.M.A.R. — Solicitud de ayuda"
+      : "A.M.A.R. — Alerta automática";
+    const safeText = [
+      "Se registró una alerta en A.M.A.R.",
+      "",
+      `Usuario: ${profile?.name || userData.user.email || "Usuario A.M.A.R."}`,
+      `Tipo: ${body.type === "manual_sos" ? "Solicitud manual de ayuda" : "Alerta automática"}`,
+      `Detalle: ${message}`,
+      `Fecha: ${new Date(alert.created_at).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}`,
+      "",
+      "Esta notificación no confirma que el usuario esté recibiendo atención médica. Si corresponde, comunicate directamente con él.",
+    ].join("\\n");
+
+    for (const contact of emailContacts) {
+      try {
+        const response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [contact.email.trim()],
+            subject,
+            text: safeText,
+          }),
+        });
+
+        if (!response.ok) {
+          const detail = await response.text();
+          console.error("Resend rechazó un correo SOS:", response.status, detail.slice(0, 300));
+          emailFailedCount++;
+        } else {
+          emailSentCount++;
+        }
+      } catch (sendError) {
+        console.error("Falló el envío de correo SOS:", sendError);
+        emailFailedCount++;
+      }
+    }
+  }
+
+  const communicationsSent = emailSentCount > 0;
+  let resultMessage = "Alerta registrada.";
+
+  if (!emailConfigured) {
+    resultMessage += " Falta configurar RESEND_API_KEY y RESEND_FROM_EMAIL para enviar correos.";
+  } else if (emailContacts.length === 0) {
+    resultMessage += " No hay contactos con correo electrónico.";
+  } else if (emailFailedCount > 0) {
+    resultMessage += ` Correos enviados: ${emailSentCount}; fallidos: ${emailFailedCount}.`;
+  } else {
+    resultMessage += ` Se enviaron ${emailSentCount} correo(s) de aviso.`;
   }
 
   return respond({
     success: true,
     alert,
-    contacts_count: contacts.length,
-    communications_sent: false,
-    message: "Alerta registrada. No se realizaron llamadas ni envíos.",
+    contacts_count: contacts?.length ?? 0,
+    email_contacts_count: emailContacts.length,
+    email_configured: emailConfigured,
+    email_sent_count: emailSentCount,
+    email_failed_count: emailFailedCount,
+    communications_sent: communicationsSent,
+    message: resultMessage,
   });
 });
