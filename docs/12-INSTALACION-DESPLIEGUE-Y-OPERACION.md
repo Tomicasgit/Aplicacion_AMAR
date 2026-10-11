@@ -73,7 +73,7 @@ El firmware vigente se encuentra en el repositorio separado [Tomicasgit/ESP32_Pr
 8. Verificar pantalla, sensor y BLE por separado.
 9. Registrar commit, versiones de bibliotecas y resultado real.
 
-La explicación completa está en [24 — Referencia del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md) y en la [guía de montaje y pruebas del repositorio de firmware](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/docs/03-MONTAJE-CARGA-Y-PRUEBAS.md). No asumir que una opción de otra placa ESP32 es intercambiable.
+La explicación completa está en [24 — Referencia del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md) y en el plan de pruebas incluido en [24 — Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md). No asumir que una opción de otra placa ESP32 es intercambiable.
 
 ## 7. Operación y monitoreo
 
