@@ -7,6 +7,8 @@
   let databaseDeviceId = null;
   let currentUserId = null;
   let lastSeenUpdate = 0;
+  let lastReadingSavedAt = 0;
+  const READING_SAVE_INTERVAL_MS = 15000;
   let savingReading = false;
   let readingErrorShown = false;
 
@@ -52,7 +54,8 @@
       !Number.isInteger(data.lpm) ||
       data.lpm <= 0 ||
       data.lpm > 300 ||
-      savingReading
+      savingReading ||
+      Date.now() - lastReadingSavedAt < READING_SAVE_INTERVAL_MS
     ) {
       return;
     }
@@ -76,6 +79,14 @@
       if (error) throw error;
 
       readingErrorShown = false;
+      lastReadingSavedAt = Date.now();
+
+      // Mantener el historial y los resúmenes sincronizados sin recargar la página.
+      if (typeof heartReadings !== 'undefined' && Array.isArray(heartReadings)) {
+        heartReadings.push({ lpm: data.lpm, recorded_at: recordedAt });
+        if (typeof renderDailySummary === 'function') renderDailySummary();
+        if (typeof renderCalendar === 'function') renderCalendar();
+      }
 
       const now = Date.now();
       if (databaseDeviceId && now - lastSeenUpdate >= 15000) {
@@ -162,6 +173,14 @@
     currentUserId = null;
     bluetoothDevice = null;
     setConnectionStatus('Desconectado');
+    const bpm = document.querySelector('#bpm');
+    const readingTime = document.querySelector('#readingTime');
+    const heartState = document.querySelector('#heartState');
+    const waveformBox = document.querySelector('.heartbeat-visual');
+    if (bpm) bpm.textContent = '--';
+    if (readingTime) readingTime.textContent = 'Sin conexión';
+    if (heartState) heartState.textContent = 'Dispositivo desconectado';
+    if (waveformBox) waveformBox.classList.remove('is-live');
 
     if (disconnectedDeviceId && disconnectedUserId) {
       try {
