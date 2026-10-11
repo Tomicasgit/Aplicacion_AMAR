@@ -8,7 +8,7 @@
   let currentUserId = null;
   let lastSeenUpdate = 0;
   let lastReadingAttemptAt = 0;
-  const READING_SAVE_INTERVAL_MS = 15000;
+  const READING_SAVE_INTERVAL_MS = 60000;
   let savingReading = false;
   let readingErrorShown = false;
 
@@ -54,6 +54,9 @@
       !Number.isInteger(data.lpm) ||
       data.lpm <= 0 ||
       data.lpm > 300 ||
+      data.sensor_state !== 'midiendo' ||
+      !Number.isFinite(data.quality) ||
+      data.quality < 3 ||
       savingReading ||
       Date.now() - lastReadingAttemptAt < READING_SAVE_INTERVAL_MS
     ) {
