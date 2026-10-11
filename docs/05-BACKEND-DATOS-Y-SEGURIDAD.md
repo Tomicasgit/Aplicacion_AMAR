@@ -13,7 +13,7 @@ El siguiente mapa se deriva de las consultas presentes en el cliente y las funci
 | `profiles` | Datos del perfil; la función SOS consulta `name` por el ID del usuario. |
 | `devices` | Dispositivos asociados al usuario y metadatos de vinculación. |
 | `emergency_contacts` | Nombre, teléfono, correo y relación/contacto de emergencia. |
-| `readings` | Mediciones de LPM asociadas al usuario/dispositivo y su tiempo. |
+| `heart_readings` | Mediciones de LPM asociadas al usuario/dispositivo y su tiempo. |
 | `locations` | Ubicaciones guardadas con marca temporal y coordenadas. |
 | `alerts` | Registro de solicitudes manuales/automáticas, mensaje, estado y propietario. |
 
