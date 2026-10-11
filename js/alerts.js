@@ -105,6 +105,16 @@
     return "La alerta quedó registrada. No se pudo confirmar el envío de correos.";
   }
 
+  async function refreshDashboardSafely() {
+    try {
+      if (typeof loadDashboard === "function") {
+        await loadDashboard();
+      }
+    } catch (error) {
+      console.warn("La alerta se registró, pero el panel no se actualizó:", error);
+    }
+  }
+
   // =========================================================
   // UBICACIÓN
   // =========================================================
@@ -537,7 +547,7 @@
       modalContent.innerHTML = `
         <h2>Registrando alerta</h2>
         <p>
-          Guardando la solicitud e intentando obtener la ubicación.
+          Obteniendo la ubicación y registrando la solicitud.
         </p>
       `;
     }
@@ -572,6 +582,7 @@
         }
       }
 
+      await refreshDashboardSafely();
       const contactsHTML = await buildEmergencyContactsHTML();
 
       if (typeof openModal === "function") {
