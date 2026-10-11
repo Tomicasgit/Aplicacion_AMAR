@@ -20,6 +20,33 @@
     if (badge) badge.textContent = text;
   }
 
+  // Mantener el dispositivo en línea aunque la calidad todavía no permita
+  // guardar una lectura cardíaca en el historial.
+  async function updateDeviceHeartbeat() {
+    if (!currentUserId || !databaseDeviceId) return;
+
+    const now = Date.now();
+    if (now - lastSeenUpdate < 15000) return;
+    lastSeenUpdate = now;
+
+    try {
+      const { error } = await supabaseClient
+        .from('devices')
+        .update({
+          status: 'online',
+          last_seen_at: new Date(now).toISOString()
+        })
+        .eq('id', databaseDeviceId)
+        .eq('user_id', currentUserId);
+
+      if (error) throw error;
+    } catch (error) {
+      // Permitir un nuevo intento pronto si Supabase rechazó la actualización.
+      lastSeenUpdate = Math.max(0, Date.now() - 10000);
+      console.error('No se pudo actualizar la actividad del dispositivo:', error);
+    }
+  }
+
   function updateReading(data) {
     const bpm = document.querySelector('#bpm');
     const readingTime = document.querySelector('#readingTime');
@@ -65,11 +92,12 @@
     if (waveformBox) waveformBox.classList.remove('is-live');
 
     const states = {
-      sin_dedo: 'Colocá el dedo en el sensor',
+      sin_contacto: 'Colocá el dispositivo correctamente sobre la muñeca',
+      sin_dedo: 'Colocá el dispositivo correctamente sobre la muñeca',
       estabilizando: 'Estabilizando lectura',
       error_sensor: 'Error del sensor',
       sin_datos: 'Esperando datos del sensor',
-      midiendo: 'Señal insuficiente; mantené el dedo quieto'
+      midiendo: 'Señal insuficiente; mantené la muñeca quieta'
     };
     if (heartState) {
       heartState.textContent = states[data.sensor_state] || 'Esperando una lectura válida';
@@ -120,20 +148,6 @@
         if (typeof renderCalendar === 'function') renderCalendar();
       }
 
-      const now = Date.now();
-      if (databaseDeviceId && now - lastSeenUpdate >= 15000) {
-        lastSeenUpdate = now;
-
-        const { error: updateError } = await supabaseClient
-          .from('devices')
-          .update({ last_seen_at: new Date(now).toISOString() })
-          .eq('id', databaseDeviceId)
-          .eq('user_id', currentUserId);
-
-        if (updateError) {
-          console.error('No se pudo actualizar last_seen_at:', updateError);
-        }
-      }
     } catch (error) {
       console.error('Error al guardar la lectura en Supabase:', error);
 
@@ -164,6 +178,7 @@
       if (signature === lastPayloadSignature) return;
       lastPayloadSignature = signature;
       lastTelemetryAt = Date.now();
+      void updateDeviceHeartbeat();
       console.info('A.M.A.R. — telemetría recibida por ' + source + '.', data);
 
       if (window.AMARAlerts?.processReading) {
