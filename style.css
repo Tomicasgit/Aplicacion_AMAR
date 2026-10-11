@@ -1318,3 +1318,43 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 @media (max-width: 760px) {
   .top-heading p { max-width: 42ch; }
 }
+
+
+/* =========================================================
+   SPA behavior: una sola vista visible en cualquier pantalla.
+   Este bloque debe permanecer al final para prevalecer sobre
+   las reglas responsive anteriores.
+   ========================================================= */
+.view:not(.active) {
+  display: none !important;
+}
+.view.active {
+  animation: spa-view-enter .22s ease-out both;
+}
+@keyframes spa-view-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dashboard-section:not(.active) {
+  display: none !important;
+}
+.dashboard-section.active {
+  display: block;
+  animation: spa-section-enter .2s ease-out both;
+}
+@keyframes spa-section-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 760px) {
+  /* En móvil cambia la distribución, nunca la visibilidad de vistas. */
+  .view.auth.active { display: block !important; }
+  .view.app.active { display: block !important; }
+  .view:not(.active) { display: none !important; }
+  .dashboard-section:not(.active) { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view.active, .dashboard-section.active {
+    animation: none !important;
+  }
+}
