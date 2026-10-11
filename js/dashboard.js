@@ -76,10 +76,23 @@
         $('#patientName').textContent =
           profile?.name || user.user_metadata?.name || 'Paciente';
 
-        $('#bpm').textContent = reading?.lpm ?? '--';
-        $('#readingTime').textContent = reading?.recorded_at
-          ? new Date(reading.recorded_at).toLocaleString()
-          : 'Sin datos';
+        // La tarjeta principal solo representa mediciones del día local actual.
+        // Una lectura de ayer puede seguir en el historial, pero no debe mostrarse como actual.
+        const now = new Date();
+        const recordedAt = reading?.recorded_at ? new Date(reading.recorded_at) : null;
+        const hasReadingToday = Boolean(
+          recordedAt &&
+          !Number.isNaN(recordedAt.getTime()) &&
+          recordedAt.getFullYear() === now.getFullYear() &&
+          recordedAt.getMonth() === now.getMonth() &&
+          recordedAt.getDate() === now.getDate()
+        );
+        const todayReading = hasReadingToday ? reading : null;
+
+        $('#bpm').textContent = todayReading?.lpm ?? '0';
+        $('#readingTime').textContent = todayReading?.recorded_at
+          ? new Date(todayReading.recorded_at).toLocaleString('es-AR')
+          : 'Sin mediciones hoy';
 
         $('#contactsCount').textContent = results[3].count ?? 0;
 
@@ -87,9 +100,9 @@
           ? `${device.name}: ${device.status}`
           : 'Sin dispositivo';
 
-        $('#heartState').textContent = reading
-          ? 'Última lectura recibida'
-          : 'Esperando lecturas del dispositivo';
+        $('#heartState').textContent = todayReading
+          ? 'Última lectura recibida hoy'
+          : 'Todavía no hay mediciones de hoy';
 
         $('#location').textContent = locationData
           ? `${locationData.latitude}, ${locationData.longitude} — ${new Date(locationData.recorded_at).toLocaleString()}`
