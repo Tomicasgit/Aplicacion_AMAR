@@ -89,10 +89,14 @@
         );
         const todayReading = hasReadingToday ? reading : null;
 
-        $('#bpm').textContent = todayReading?.lpm ?? '0';
-        $('#readingTime').textContent = todayReading?.recorded_at
-          ? new Date(todayReading.recorded_at).toLocaleString('es-AR')
-          : 'Sin mediciones hoy';
+        // La lectura BLE en vivo tiene prioridad sobre el último registro guardado.
+        // loadDashboard() también se ejecuta al conectar y no debe pisar el valor del ESP32.
+        if (!window.AMARLiveReadingActive) {
+          $('#bpm').textContent = todayReading?.lpm ?? '0';
+          $('#readingTime').textContent = todayReading?.recorded_at
+            ? new Date(todayReading.recorded_at).toLocaleString('es-AR')
+            : 'Sin mediciones hoy';
+        }
 
         $('#contactsCount').textContent = results[3].count ?? 0;
 
@@ -100,9 +104,11 @@
           ? `${device.name}: ${device.status}`
           : 'Sin dispositivo';
 
-        $('#heartState').textContent = todayReading
-          ? 'Última lectura recibida hoy'
-          : 'Todavía no hay mediciones de hoy';
+        if (!window.AMARLiveReadingActive) {
+          $('#heartState').textContent = todayReading
+            ? 'Última lectura recibida hoy'
+            : 'Todavía no hay mediciones de hoy';
+        }
 
         $('#location').textContent = locationData
           ? `${locationData.latitude}, ${locationData.longitude} — ${new Date(locationData.recorded_at).toLocaleString()}`
