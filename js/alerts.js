@@ -589,34 +589,30 @@
 
       if (typeof openModal === "function") {
         openModal(`
-          <h2>Alerta registrada</h2>
-
-          <p>
-            La solicitud quedó guardada en A.M.A.R.
-          </p>
-
-          <p>
-            ${
+          <div class="sos-confirmation">
+            <header class="sos-header">
+              <span class="sos-confirmation-icon" aria-hidden="true">!</span>
+              <div>
+                <small class="sos-kicker">A.M.A.R. · aviso automático</small>
+                <h2>Alerta registrada</h2>
+              </div>
+            </header>
+            <p>La solicitud quedó guardada en A.M.A.R.</p>
+            <p>${
               locationSaved
                 ? "La ubicación también se guardó."
                 : "No se pudo guardar la ubicación."
-            }
-          </p>
-
-          ${contactsHTML}
-
-          <p><strong>${escapeContactHTML(communicationStatusText(sosResult))}</strong></p>
-          <p class="sos-disclaimer">
-            A.M.A.R. no realiza llamadas automáticas ni activa una alarma en el teléfono de los contactos.
-          </p>
-
-          <button
-            type="button"
-            class="primary"
-            onclick="closeModal()"
-          >
-            Entendido
-          </button>
+            }</p>
+            ${contactsHTML}
+            <p class="sos-result-status${Number(sosResult?.email_failed_count) > 0 && Number(sosResult?.email_sent_count) > 0 ? " is-partial" : ""}">
+              <strong>${escapeContactHTML(communicationStatusText(sosResult))}</strong>
+            </p>
+            <p class="sos-disclaimer">
+              A.M.A.R. no realiza llamadas automáticas ni activa una alarma en el teléfono de los contactos.
+              El envío de un correo no confirma que el destinatario lo haya leído.
+            </p>
+            <button type="button" class="primary" onclick="closeModal()">Entendido</button>
+          </div>
         `);
       }
     } catch (error) {
@@ -719,39 +715,32 @@ let position = null;
       if (typeof openModal === "function") {
         openModal(`
           <div class="sos-confirmation">
-            <h2>Solicitud SOS registrada</h2>
-
-            <p>
-              La solicitud manual quedó registrada en A.M.A.R.
-            </p>
-
-            <p>
-              ${
-                locationSaved
-                  ? "Ubicación guardada correctamente."
-                  : "No se guardó la ubicación: " +
-                    (typeof escapeHTML === "function"
-                      ? escapeHTML(locationMessage)
-                      : "ubicación no disponible")
-              }
-            </p>
-
+            <header class="sos-header">
+              <span class="sos-confirmation-icon" aria-hidden="true">!</span>
+              <div>
+                <small class="sos-kicker">A.M.A.R. · solicitud manual</small>
+                <h2>Solicitud SOS registrada</h2>
+              </div>
+            </header>
+            <p>La solicitud manual quedó registrada en A.M.A.R.</p>
+            <p>${
+              locationSaved
+                ? "Ubicación guardada correctamente."
+                : "No se guardó la ubicación: " +
+                  (typeof escapeHTML === "function"
+                    ? escapeHTML(locationMessage)
+                    : "ubicación no disponible")
+            }</p>
             ${contactsHTML}
-
-            <p><strong>${escapeContactHTML(communicationStatusText(result))}</strong></p>
+            <p class="sos-result-status${Number(result?.email_failed_count) > 0 && Number(result?.email_sent_count) > 0 ? " is-partial" : ""}">
+              <strong>${escapeContactHTML(communicationStatusText(result))}</strong>
+            </p>
             <p class="sos-disclaimer">
               Los botones de teléfono y WhatsApp abren la aplicación para que completes el contacto.
               A.M.A.R. no realiza llamadas automáticas ni activa una alarma remota.
-              Si necesitás asistencia inmediata, contactá directamente a los servicios de emergencia.
+              El envío de un correo no confirma que el destinatario lo haya leído. Si necesitás asistencia inmediata, contactá directamente a los servicios de emergencia.
             </p>
-
-            <button
-              type="button"
-              class="primary"
-              onclick="closeModal()"
-            >
-              Entendido
-            </button>
+            <button type="button" class="primary" onclick="closeModal()">Entendido</button>
           </div>
         `);
       }
