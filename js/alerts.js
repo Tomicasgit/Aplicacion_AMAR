@@ -218,7 +218,9 @@
         const whatsappMessage = encodeURIComponent(
           "EMERGENCIA A.M.A.R.: necesito ayuda. Por favor, comunicate conmigo."
         );
-        const whatsappLink = whatsappPhone.length >= 10
+        // Mostrar la acción siempre que exista un teléfono con dígitos.
+        // La validación estricta ocultaba el botón para números locales cortos.
+        const whatsappLink = whatsappPhone
           ? `<a class="whatsapp-button" href="https://wa.me/${whatsappPhone}?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp a ${name}">WhatsApp</a>`
           : "";
 
