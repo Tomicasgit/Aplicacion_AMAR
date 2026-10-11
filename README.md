@@ -6,6 +6,8 @@
 > **Firmware declarado en el sketch:** v4.1  
 > **Estado de la documentación:** guía funcional, técnica, de operación, seguridad, pruebas y uso.
 
+> **¿Querés explorar todas las mejoras posibles y cómo implementarlas?** Consultá el [Catálogo integral de mejoras y hoja de ruta](README-MEJORAS.md), un documento independiente con propuestas de frontend, UX, BLE, firmware, seguridad, datos, SOS, pruebas, despliegue, investigación y un plan de ejecución por etapas.
+
 A.M.A.R. es un prototipo que combina un dispositivo basado en ESP32 y sensor óptico MAX30102 con una aplicación web. Su propósito es estimar y mostrar latidos por minuto (LPM), conservar lecturas recibidas para consultar su evolución y facilitar una solicitud SOS con notificación a contactos configurados cuando los servicios de servidor y correo están activos.
 
 **Límite fundamental:** A.M.A.R. no es un dispositivo médico certificado, no diagnostica ni descarta enfermedades, no sustituye una consulta médica, un ECG, un tratamiento ni los servicios de emergencia. La calidad de una lectura depende del sensor, el contacto, el movimiento, el firmware, la conexión y las condiciones de uso.
