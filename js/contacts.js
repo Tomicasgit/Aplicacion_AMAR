@@ -29,7 +29,6 @@
           </div>
           <div class="record-actions">
             <a class="call-button" href="tel:${escapeHTML(contact.phone)}" aria-label="Llamar a ${escapeHTML(contact.name)}">Llamar</a>
-            <a class="email-button" href="mailto:${escapeHTML(contact.email || '')}" ${contact.email ? '' : 'aria-disabled="true" onclick="return false"'}>Correo</a>
             <button type="button" class="edit-button"
               onclick="editContact('${contact.id}')">Editar</button>
             <button type="button" class="delete-button"
