@@ -133,6 +133,7 @@
         .from('heart_readings')
         .insert({
           user_id: currentUserId,
+          device_id: databaseDeviceId,
           lpm: data.lpm,
           recorded_at: recordedAt
         });
@@ -174,11 +175,13 @@
       if (!json.startsWith('{')) return;
       const data = JSON.parse(json);
       const signature = JSON.stringify(data);
-      if (signature === lastPayloadSignature) return;
+      const duplicatePayload = signature === lastPayloadSignature;
       lastPayloadSignature = signature;
+      // Una lectura repetida sigue demostrando que BLE está entregando datos.
+      // No descartamos el procesamiento visual solo porque coincida con el paquete anterior.
       lastTelemetryAt = Date.now();
       void updateDeviceHeartbeat();
-      console.info('A.M.A.R. — telemetría recibida por ' + source + '.', data);
+      console.info('A.M.A.R. — telemetría recibida por ' + source + (duplicatePayload ? ' (paquete repetido)' : '') + '.', data);
 
       if (window.AMARAlerts?.processReading) {
         const resultado = window.AMARAlerts.processReading(data);
