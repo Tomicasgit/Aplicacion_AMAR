@@ -24,26 +24,47 @@
     const waveform = document.querySelector('#heartbeatWave');
     const waveformBox = document.querySelector('.heartbeat-visual');
 
-    if (Number.isFinite(data.lpm) && data.lpm > 0 && data.lpm <= 300) {
+    const validReading =
+      Number.isInteger(data.lpm) &&
+      data.lpm > 0 &&
+      data.lpm <= 300 &&
+      data.sensor_state === 'midiendo' &&
+      Number.isFinite(data.quality) &&
+      data.quality >= 3;
+
+    if (validReading) {
       if (waveformBox) {
         waveformBox.dataset.lpm = String(data.lpm);
         waveformBox.classList.add('is-live');
       }
       if (waveform) {
-        waveform.style.setProperty('--beat-duration', `${Math.max(0.45, Math.min(1.5, 60 / data.lpm))}s`);
+        waveform.style.setProperty(
+          '--beat-duration',
+          `${Math.max(0.45, Math.min(1.5, 60 / data.lpm))}s`
+        );
       }
-    }
-
-    if (Number.isFinite(data.lpm) && data.lpm > 0 && data.lpm <= 300) {
       if (bpm) bpm.textContent = String(data.lpm);
       if (readingTime) {
         readingTime.textContent = new Date().toLocaleTimeString('es-AR');
       }
-      if (heartState) {
-        heartState.textContent = data.sensor_state || 'Lectura recibida';
-      }
-    } else if (heartState && data.sensor_state) {
-      heartState.textContent = data.sensor_state;
+      if (heartState) heartState.textContent = 'Monitoreando';
+      return;
+    }
+
+    // No mostrar como actual una medición cuando el sensor perdió la señal.
+    if (bpm) bpm.textContent = '--';
+    if (readingTime) readingTime.textContent = 'Sin lectura válida';
+    if (waveformBox) waveformBox.classList.remove('is-live');
+
+    const states = {
+      sin_dedo: 'Colocá el dedo en el sensor',
+      estabilizando: 'Estabilizando lectura',
+      error_sensor: 'Error del sensor',
+      sin_datos: 'Esperando datos del sensor',
+      midiendo: 'Señal insuficiente; mantené el dedo quieto'
+    };
+    if (heartState) {
+      heartState.textContent = states[data.sensor_state] || 'Esperando una lectura válida';
     }
   }
 
