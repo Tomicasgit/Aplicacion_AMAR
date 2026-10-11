@@ -91,3 +91,8 @@ El HTML debe cargar la configuración pública y las bibliotecas externas antes 
 ## 8. Regla de mantenimiento
 
 Un módulo debe tener una responsabilidad dominante. Antes de duplicar una función común, revisar `core.js`. Antes de introducir un acceso a datos, revisar el modelo y las políticas RLS. Antes de cambiar un contrato BLE, actualizar firmware, cliente, documentación y pruebas en el mismo cambio.
+
+
+## Fuente canónica del firmware
+
+El sketch que declara v4.1 dentro de este repositorio es una copia histórica. El firmware actual del dispositivo se mantiene en [`Tomicasgit/ESP32_Proyecto2030/Completop.ino`](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/Completop.ino) y declara v5.3. No modificar la copia histórica esperando que ese cambio se refleje en el firmware canónico. La lógica completa se documenta en [24 — Referencia del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md).
