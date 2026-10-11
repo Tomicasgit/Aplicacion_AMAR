@@ -196,12 +196,21 @@
           ? `<a class="email-button" href="mailto:${escapeContactHTML(email)}?subject=${encodeURIComponent("Alerta A.M.A.R.")}&body=${encodeURIComponent("Necesito que te comuniques conmigo. Revisá mi situación, por favor.")}">Redactar correo</a>`
           : "";
 
+        const whatsappPhone = phone.replace(/\D/g, "");
+        const whatsappMessage = encodeURIComponent(
+          "EMERGENCIA A.M.A.R.: necesito ayuda. Por favor, comunicate conmigo."
+        );
+        const whatsappLink = whatsappPhone
+          ? `<a class="whatsapp-button" href="https://wa.me/${whatsappPhone}?text=${whatsappMessage}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`
+          : "";
+
         return `
           <li class="sos-contact-item">
             <strong>${name}</strong>
             <div class="record-actions">
               ${callLink}
               ${emailLink}
+              ${whatsappLink}
             </div>
             ${!phone && !email
               ? "<small>Este contacto no tiene teléfono ni correo disponible.</small>"
