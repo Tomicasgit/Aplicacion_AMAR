@@ -30,14 +30,19 @@ El firmware del repositorio declara la versión **v4.1** en `FW_VERSION`. Confir
 
 La asignación exacta debe contrastarse con el bloque de configuración de `Completop.ino` y con la revisión física de la placa antes de cablear. Los comentarios del código son la referencia primaria, porque el pinout puede cambiar entre revisiones de hardware.
 
-| Interfaz | Señales que deben verificarse | Propósito |
-|---|---|---|
-| I²C | SDA / SCL declarados en firmware | Sensor MAX30102, dirección habitual del módulo 0x57. |
-| SPI | MOSI / SCLK | Datos y reloj de pantalla. |
-| Control ST7789 | CS / DC / RST / BL según configuración | Selección, comando/datos, reinicio y retroiluminación. |
-| USB | USB-C de la placa | Alimentación, carga de firmware y puerto serie según la placa. |
+| Señal del firmware v4.1 | GPIO | Propósito |
+|---|---:|---|
+| I²C SDA | 25 | Datos del MAX30102. |
+| I²C SCL | 26 | Reloj del MAX30102. |
+| TFT MOSI | 23 | Datos SPI hacia ST7789. |
+| TFT SCLK | 18 | Reloj SPI de la pantalla. |
+| TFT CS | 15 | Selección de pantalla. |
+| TFT DC | 2 | Selección comando/datos. |
+| TFT RST | 4 | Reinicio de pantalla. |
+| TFT BL | 32 | Control de retroiluminación. |
+| MAX30102 I²C address | `0x57` | Dirección declarada para la comprobación del sensor. |
 
-No conectar basándose únicamente en una tabla resumida: verificar etiquetas serigrafiadas, voltajes admitidos y el pinout exacto de la revisión utilizada.
+Estos son los GPIO declarados en el firmware `Completop.ino` v4.1 del repositorio. Antes de cablear, verificar la serigrafía, el pinout de la revisión exacta de la placa y los niveles eléctricos admitidos.
 
 ## 4. Cadena de medición
 
@@ -56,7 +61,7 @@ La estimación depende del contacto del sensor con la piel, movimiento, iluminac
 
 ## 5. Bluetooth Low Energy
 
-El firmware implementa un servidor BLE. La web busca el servicio y característica configurados en ambos extremos y se suscribe a sus notificaciones. Los UUID del firmware y del módulo `js/bluetooth.js` deben mantenerse idénticos. Si se modifica uno, actualizar y probar ambos lados.
+El firmware implementa un servidor BLE. La web busca el servicio y característica configurados en ambos extremos y se suscribe a sus notificaciones. Los UUID declarados tanto en `Completop.ino` como en `js/bluetooth.js` son:\n\n| Elemento BLE | UUID |\n|---|---|\n| Servicio | `4fafc201-1fb5-459e-8fcc-c5c9c331914b` |\n| Característica | `beb5483e-36e1-4688-b7f5-ea07361b26a8` |\n\nDeben mantenerse idénticos en ambos extremos. Si se modifica uno, actualizar y probar ambos lados.
 
 El transporte BLE no equivale a conexión a Internet: el navegador recibe los datos directamente desde el dispositivo y después puede guardarlos en Supabase.
 
