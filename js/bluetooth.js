@@ -141,11 +141,10 @@
 
       readingErrorShown = false;
 
-      // Mantener el historial y los resúmenes sincronizados sin recargar la página.
-      if (typeof heartReadings !== 'undefined' && Array.isArray(heartReadings)) {
-        heartReadings.push({ lpm: data.lpm, recorded_at: recordedAt });
-        if (typeof renderDailySummary === 'function') renderDailySummary();
-        if (typeof renderCalendar === 'function') renderCalendar();
+      // Recargar el historial desde la base para reflejar solo filas realmente guardadas.
+      // Esto también evita perder la nueva fila si la carga inicial terminó al mismo tiempo.
+      if (typeof loadHeartHistory === 'function') {
+        await loadHeartHistory(currentUserId);
       }
 
     } catch (error) {
