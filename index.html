@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#e64e68">
+  <meta name="theme-color" content="#0B1220">
   <title>A.M.A.R. — Alerta de Latidos y Monitoreo Autónomo</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
   <!-- Vista: Iniciar sesión -->
   <main id="loginView" class="view auth active">
     <aside class="aside">
-      <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
+      <div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h4l2.2-5.2L13 17l2.4-5H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 21s-8.5-4.7-8.5-11.2A4.8 4.8 0 0 1 12 6.9a4.8 4.8 0 0 1 8.5 2.9C20.5 16.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/></svg></span>A.M.A.R.</div>
       <div>
         <h1>Tu seguridad, más cerca.</h1>
         <p>Alerta de Latidos y Monitoreo Autónomo. Consultá el estado de tu dispositivo y tus alertas en un solo lugar.</p>
@@ -41,7 +41,7 @@
   <!-- Vista: Crear cuenta (Registro) -->
   <main id="registerView" class="view auth">
     <aside class="aside">
-      <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
+      <div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h4l2.2-5.2L13 17l2.4-5H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 21s-8.5-4.7-8.5-11.2A4.8 4.8 0 0 1 12 6.9a4.8 4.8 0 0 1 8.5 2.9C20.5 16.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/></svg></span>A.M.A.R.</div>
       <div>
         <h1>Empezamos paso a paso.</h1>
         <p>Creá tu cuenta para preparar el monitoreo y los contactos de emergencia.</p>
@@ -74,10 +74,10 @@
   <!-- Vista: Panel principal (Dashboard) -->
   <main id="appView" class="view app">
     <aside class="side">
-      <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
+      <div class="brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12h4l2.2-5.2L13 17l2.4-5H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 21s-8.5-4.7-8.5-11.2A4.8 4.8 0 0 1 12 6.9a4.8 4.8 0 0 1 8.5 2.9C20.5 16.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/></svg></span>A.M.A.R.</div>
       <nav class="nav">
-        <button type="button" class="active" data-panel="homeSection">▦ Inicio</button>
-        <button type="button" data-panel="historySection">▤ Historial</button>
+        <button type="button" class="active" data-panel="homeSection" aria-label="Ir al inicio">⌂ Inicio</button>
+        <button type="button" data-panel="historySection" aria-label="Ver historial cardíaco">◷ Historial</button>
         <button id="addDevice" type="button">⌁ Vincular ESP32</button>
         <button id="addContact" type="button">♧ Contactos</button>
       </nav>
@@ -90,6 +90,11 @@
     </aside>
     <section class="dashboard">
       <header class="top">
+        <div class="top-heading">
+          <small>MONITOREO PERSONAL</small>
+          <h1>Tu panel de salud</h1>
+          <p>Consultá tus lecturas y el estado de tu dispositivo A.M.A.R.</p>
+        </div>
         <span id="deviceBadge" class="badge">Sin dispositivo</span>
       </header>
       <div id="homeSection" class="dashboard-section active">
