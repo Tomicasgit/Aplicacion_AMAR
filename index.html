@@ -2,189 +2,70 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#e64e68">
-  <title>A.M.A.R. — Alerta de Latidos y Monitoreo Autónomo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0B1220">
+  <meta name="description" content="A.M.A.R. — panel personal de monitoreo cardíaco y seguimiento del dispositivo.">
+  <title>A.M.A.R. — Monitoreo personal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- Vista: Iniciar sesión -->
   <main id="loginView" class="view auth active">
-    <aside class="aside">
-      <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
-      <div>
-        <h1>Tu seguridad, más cerca.</h1>
-        <p>Alerta de Latidos y Monitoreo Autónomo. Consultá el estado de tu dispositivo y tus alertas en un solo lugar.</p>
-      </div>
-      <small class="legal">No diagnostica enfermedades ni reemplaza la atención médica.</small>
+    <aside class="auth-aside">
+      <a class="brand" href="#" aria-label="A.M.A.R. inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 39S6 28 6 16C6 5 20 3 24 14 28 3 42 5 42 16 42 28 24 39 24 39Z"/><path class="pulse-line" d="M9 23h9l4-8 6 16 4-8h7"/></svg></span><span>A.M.A.R.<small>MONITOREO PERSONAL</small></span></a>
+      <div class="auth-message"><span class="eyebrow">TECNOLOGÍA QUE ACOMPAÑA</span><h1>Tu bienestar,<br><span>en perspectiva.</span></h1><p>Una forma más clara de consultar tus mediciones, mantener tu dispositivo conectado y tener a mano tus contactos de confianza.</p><div class="auth-proof"><span class="proof-icon">⌁</span><span>Dispositivo conectado · Datos en tu cuenta</span></div></div>
+      <small class="legal">Prototipo de monitoreo. No diagnostica ni reemplaza la atención médica profesional.</small>
     </aside>
-    <section class="auth-panel">
-      <form id="loginForm" class="form">
-        <h2>Iniciar sesión</h2>
-        <p class="lead">Ingresá para consultar tu panel de monitoreo.</p>
-        <div class="field">
-          <label for="loginEmail">Correo electrónico</label>
-          <input id="loginEmail" type="email" autocomplete="email" required placeholder="nombre@correo.com">
-        </div>
-        <div class="field">
-          <label for="loginPassword">Contraseña</label>
-          <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Tu contraseña">
-        </div>
-        <button id="loginBtn" class="primary" type="submit">Ingresar</button>
-        <div class="message" id="loginMessage"></div>
-        <p class="switch-text">¿No tenés cuenta? <a href="#" data-show="registerView">Crear cuenta</a></p>
-      </form>
-    </section>
+    <section class="auth-panel"><form id="loginForm" class="form auth-form"><div class="mobile-brand brand"><span class="brand-mark" aria-hidden="true">♥</span><span>A.M.A.R.<small>MONITOREO PERSONAL</small></span></div><span class="eyebrow">QUÉ BUENO VERTE</span><h2>Iniciar sesión</h2><p class="lead">Ingresá a tu espacio personal de seguimiento.</p><div class="field"><label for="loginEmail">Correo electrónico</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="nombre@correo.com"></div><div class="field"><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Tu contraseña"></div><button id="loginBtn" class="primary" type="submit">Ingresar <span aria-hidden="true">→</span></button><div class="message" id="loginMessage" role="status" aria-live="polite"></div><p class="switch-text">¿Todavía no tenés cuenta? <a href="#" data-show="registerView">Crear cuenta</a></p><p class="form-legal">Tus datos personales requieren cuidado. Compartilos solo con personas de confianza.</p></form></section>
   </main>
-
-  <!-- Vista: Crear cuenta (Registro) -->
   <main id="registerView" class="view auth">
-    <aside class="aside">
-      <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
-      <div>
-        <h1>Empezamos paso a paso.</h1>
-        <p>Creá tu cuenta para preparar el monitoreo y los contactos de emergencia.</p>
-      </div>
-      <small class="legal">No diagnostica enfermedades ni reemplaza la atención médica.</small>
-    </aside>
-    <section class="auth-panel">
-      <form id="registerForm" class="form">
-        <h2>Crear cuenta</h2>
-        <p class="lead">Tus datos se guardan de forma segura.</p>
-        <div class="field">
-          <label for="name">Nombre</label>
-          <input id="name" required placeholder="Tu nombre">
-        </div>
-        <div class="field">
-          <label for="registerEmail">Correo electrónico</label>
-          <input id="registerEmail" type="email" required placeholder="nombre@correo.com">
-        </div>
-        <div class="field">
-          <label for="registerPassword">Contraseña</label>
-          <input id="registerPassword" type="password" minlength="6" required placeholder="Mínimo 6 caracteres">
-        </div>
-        <button id="registerBtn" class="primary" type="submit">Crear cuenta</button>
-        <div class="message" id="registerMessage"></div>
-        <p class="switch-text">¿Ya tenés cuenta? <a href="#" data-show="loginView">Iniciar sesión</a></p>
-      </form>
-    </section>
+    <aside class="auth-aside"><a class="brand" href="#" aria-label="A.M.A.R."><span class="brand-mark" aria-hidden="true">♥</span><span>A.M.A.R.<small>MONITOREO PERSONAL</small></span></a><div class="auth-message"><span class="eyebrow">UN PRIMER PASO</span><h1>Empezá a cuidar<br><span>tu seguimiento.</span></h1><p>Prepará tu espacio, vinculá el dispositivo y organizá tus contactos de emergencia desde una sola aplicación.</p></div><small class="legal">Prototipo de monitoreo. No diagnostica ni reemplaza la atención médica profesional.</small></aside>
+    <section class="auth-panel"><form id="registerForm" class="form auth-form"><div class="mobile-brand brand"><span class="brand-mark" aria-hidden="true">♥</span><span>A.M.A.R.<small>MONITOREO PERSONAL</small></span></div><span class="eyebrow">CREÁ TU ESPACIO</span><h2>Crear cuenta</h2><p class="lead">Completá tus datos para empezar.</p><div class="field"><label for="name">Nombre</label><input id="name" autocomplete="name" required placeholder="Tu nombre"></div><div class="field"><label for="registerEmail">Correo electrónico</label><input id="registerEmail" type="email" autocomplete="email" required placeholder="nombre@correo.com"></div><div class="field"><label for="registerPassword">Contraseña</label><input id="registerPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"></div><button id="registerBtn" class="primary" type="submit">Crear cuenta <span aria-hidden="true">→</span></button><div class="message" id="registerMessage" role="status" aria-live="polite"></div><p class="switch-text">¿Ya tenés cuenta? <a href="#" data-show="loginView">Iniciar sesión</a></p><p class="form-legal">A.M.A.R. es un prototipo y no sustituye una consulta médica.</p></form></section>
   </main>
-
-  <!-- Vista: Panel principal (Dashboard) -->
   <main id="appView" class="view app">
     <aside class="side">
-      <div class="brand"><span class="mark">♥</span>A.M.A.R.</div>
-      <nav class="nav">
-        <button type="button" class="active" data-panel="homeSection">▦ Inicio</button>
-        <button type="button" data-panel="historySection">▤ Historial</button>
-        <button id="addDevice" type="button">⌁ Vincular ESP32</button>
-        <button id="addContact" type="button">♧ Contactos</button>
+      <a class="brand" href="#" aria-label="A.M.A.R. inicio"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 39S6 28 6 16C6 5 20 3 24 14 28 3 42 5 42 16 42 28 24 39 24 39Z"/><path class="pulse-line" d="M9 23h9l4-8 6 16 4-8h7"/></svg></span><span>A.M.A.R.<small>MONITOREO PERSONAL</small></span></a>
+      <div class="side-label">TU ESPACIO</div>
+      <nav class="nav" aria-label="Navegación principal">
+        <button type="button" class="active" data-panel="homeSection"><span class="nav-icon">◫</span><span>Resumen</span><span class="nav-arrow">›</span></button>
+        <button type="button" data-panel="historySection"><span class="nav-icon">⌁</span><span>Historial</span><span class="nav-arrow">›</span></button>
+        <button id="addDevice" type="button"><span class="nav-icon">⌁</span><span>Vincular dispositivo</span><span class="nav-arrow">+</span></button>
+        <button id="addContact" type="button"><span class="nav-icon">♧</span><span>Contactos</span><span class="nav-arrow">+</span></button>
       </nav>
-      <div class="sidebar-account">
-        <div class="sidebar-user-label">Sesión iniciada</div>
-        <h2>Hola, <span id="patientName">Paciente</span></h2>
-        <button type="button" class="sidebar-profile-edit" onclick="editProfile()">Editar perfil</button>
-        <button class="logout" id="logout">Cerrar sesión</button>
-      </div>
+      <div class="side-note"><span class="note-icon">✳</span><strong>Seguimiento consciente</strong><p>Usá tus mediciones como información para conversar con profesionales de salud.</p></div>
+      <div class="sidebar-account"><div class="account-avatar" aria-hidden="true">A</div><div class="account-copy"><span class="sidebar-user-label">SESIÓN ACTIVA</span><h2 id="patientName">Paciente</h2><button type="button" class="sidebar-profile-edit" onclick="editProfile()">Editar perfil</button></div><button type="button" class="logout" id="logout" aria-label="Cerrar sesión" title="Cerrar sesión">↗</button></div>
     </aside>
     <section class="dashboard">
-      <header class="top">
-        <span id="deviceBadge" class="badge">Sin dispositivo</span>
-      </header>
+      <header class="top"><div class="top-heading"><span class="eyebrow" id="dateEyebrow">TU ESPACIO PERSONAL</span><h1 id="greetingTitle">Tu resumen</h1><p>Una vista clara de tu seguimiento, en un solo lugar.</p></div><div class="top-actions"><span id="deviceBadge" class="badge"><span class="status-dot"></span>Sin dispositivo</span><button class="top-avatar" type="button" onclick="editProfile()" aria-label="Editar perfil" title="Editar perfil">A</button></div></header>
       <div id="homeSection" class="dashboard-section active">
-      <div class="grid">
-        <article class="card pulse">
-          <h3>Frecuencia cardíaca</h3>
-          <div class="heart">♥</div>
-          <div class="bpm" id="bpm">--</div>
-          <div class="unit">latidos por minuto</div>
-          <div id="heartState" class="state">Esperando lecturas del dispositivo</div>
-          <button type="button" id="manualSOS" class="sos-button">
-            Solicitar ayuda (SOS)
-          </button>
-        </article>
-        <article class="card metric">
-          <small>Última lectura</small>
-          <b id="readingTime">Sin datos</b>
-        </article>
-        <article class="card wide daily-summary-card">
-          <h3>Resumen de hoy</h3>
-          <div id="dailySummary" class="calendar-summary">
-            <p class="empty">Cargando resumen diario...</p>
-          </div>
-        </article>
-
-
-        <article class="card metric">
-          <small>Contactos de emergencia</small>
-          <b id="contactsCount">0</b>
-        </article>
-                <article class="card wide">
-          <h3>Mis dispositivos</h3>
-          <div id="devicesList" class="record-list">
-            <p class="empty">Cargando dispositivos...</p>
-          </div>
-        </article>
-
-	 <article class="card wide">
-          <h3>Mis contactos de emergencia</h3>
-          <div id="contactsList" class="record-list">
-            <p class="empty">Cargando contactos...</p>
-          </div>
-        </article>
-	<article class="card wide">
-          <h3>Ubicación más reciente</h3>
-          <div class="empty" id="location">Todavía no se recibió una ubicación.</div>
-        </article>
-        <article class="card wide danger">
-          <h3>Última alerta</h3>
-          <div class="empty" id="alert">No hay alertas registradas.</div>
-        </article>
-
-      </div>
-      </div>
-
-        <div id="historySection" class="dashboard-section">
-<article class="card wide heart-history-card">
-  <h3>Seguimiento cardíaco</h3>
-  <div class="calendar-toolbar">
-    <button type="button" id="prevMonth" class="calendar-nav" aria-label="Mes anterior">&#8592;</button>
-    <strong id="calendarMonth">Cargando mes...</strong>
-    <button type="button" id="nextMonth" class="calendar-nav" aria-label="Mes siguiente">&#8594;</button>
-  </div>
-  <div class="calendar-legend">
-    <span><i class="legend-dot has-readings"></i> Día con mediciones</span>
-    <span><i class="legend-dot"></i> Sin mediciones</span>
-  </div>
-  <div id="calendarGrid" class="calendar-grid" aria-label="Calendario mensual"></div>
-  <h4>Resumen de esta semana</h4>
-  <div id="weeklySummary" class="calendar-summary">
-    <p class="empty">Cargando resumen semanal...</p>
-  </div>
-  <h4>Resumen del mes</h4>
-  <div id="calendarSummary" class="calendar-summary">
-    <p class="empty">Cargando resumen mensual...</p>
-  </div>
-  <div class="selected-day">
-    <h4 id="selectedDateTitle">Mediciones del día</h4>
-    <div id="historyList" class="record-list">
-      <p class="empty">Cargando historial...</p>
-    </div>
-  </div>
-</article>
+        <div class="section-intro"><div><span class="eyebrow">VISTA GENERAL</span><h2>Hola, <span id="welcomeName">bienvenido/a</span></h2></div><span class="today-label" id="todayLabel">Tu actividad reciente</span></div>
+        <div class="grid">
+          <article class="card pulse-card"><div class="card-topline"><div><span class="card-kicker">MONITOREO EN VIVO</span><h3>Frecuencia cardíaca</h3></div><span class="live-chip"><i></i> <span id="pulseLiveLabel">En espera</span></span></div><div class="pulse-display"><div class="pulse-visual" aria-hidden="true"><svg viewBox="0 0 180 120" class="pulse-wave"><path class="wave-glow" d="M5 63H39L51 63 65 30 83 93 101 49 111 63H175"/><path class="wave-line" d="M5 63H39L51 63 65 30 83 93 101 49 111 63H175"/></svg><span class="pulse-orbit orbit-one"></span><span class="pulse-orbit orbit-two"></span></div><div class="pulse-value"><strong id="bpm">--</strong><span>LPM</span></div></div><div id="heartState" class="state"><span class="state-indicator"></span>Esperando lecturas del dispositivo</div><div class="pulse-foot"><span>Última lectura</span><strong id="readingTime">Sin datos</strong></div><p class="metric-disclaimer">La lectura aislada no constituye un diagnóstico médico.</p></article>
+          <article class="card metric-card"><div class="metric-icon icon-cyan">◷</div><span class="card-kicker">ACTIVIDAD</span><h3>Última lectura</h3><strong class="metric-value metric-value-text" id="readingTimeSecondary">Sin datos</strong><p class="metric-caption">Último registro recibido</p><span class="metric-decoration">01</span></article>
+          <article class="card metric-card"><div class="metric-icon icon-green">♧</div><span class="card-kicker">RED DE APOYO</span><h3>Contactos de emergencia</h3><div class="metric-number"><strong id="contactsCount">0</strong><span>contactos</span></div><p class="metric-caption">Personas que tenés registradas</p><button type="button" class="text-action" id="contactsQuickAction">Ver contactos <span>→</span></button><span class="metric-decoration">02</span></article>
+          <article class="card wide daily-summary-card"><div class="card-heading-row"><div><span class="card-kicker">TUS REGISTROS</span><h3>Resumen de hoy</h3></div><span class="subtle-icon">▤</span></div><div id="dailySummary" class="calendar-summary"><p class="empty">Cargando resumen diario...</p></div></article>
+          <article class="card wide"><div class="card-heading-row"><div><span class="card-kicker">HARDWARE</span><h3>Mis dispositivos</h3></div><button type="button" class="mini-action" id="deviceQuickAction">+ Vincular</button></div><div id="devicesList" class="record-list"><p class="empty">Cargando dispositivos...</p></div></article>
+          <article class="card wide"><div class="card-heading-row"><div><span class="card-kicker">PERSONAS DE CONFIANZA</span><h3>Contactos de emergencia</h3></div><button type="button" class="mini-action" id="contactQuickAction">+ Agregar</button></div><div id="contactsList" class="record-list"><p class="empty">Cargando contactos...</p></div></article>
+          <article class="card wide"><div class="card-heading-row"><div><span class="card-kicker">UBICACIÓN</span><h3>Ubicación más reciente</h3></div><span class="subtle-icon">⌖</span></div><div class="location-content" id="location"><p class="empty">Todavía no se recibió una ubicación.</p></div></article>
+          <article class="card wide alert-card"><div class="card-heading-row"><div><span class="card-kicker">NOTIFICACIONES</span><h3>Última alerta</h3></div><span class="alert-symbol">!</span></div><div id="alert" class="empty">No hay alertas registradas.</div></article>
         </div>
+        <div class="safety-note"><span>i</span><p><strong>Recordatorio:</strong> A.M.A.R. es un prototipo de seguimiento. Ante una emergencia, contactá los servicios locales correspondientes; la aplicación no reemplaza atención médica.</p></div>
+      </div>
+      <div id="historySection" class="dashboard-section">
+        <div class="section-intro history-intro"><div><span class="eyebrow">TUS DATOS A LO LARGO DEL TIEMPO</span><h2>Historial de seguimiento</h2><p>Consultá qué días tienen mediciones guardadas.</p></div><button type="button" class="secondary history-back" data-panel="homeSection">← Volver al resumen</button></div>
+        <article class="card wide heart-history-card"><div class="card-heading-row"><div><span class="card-kicker">CALENDARIO</span><h3>Explorá tus mediciones</h3></div><span class="subtle-icon">▦</span></div><div class="calendar-toolbar"><button type="button" id="prevMonth" class="calendar-nav" aria-label="Mes anterior">←</button><strong id="calendarMonth">Cargando mes...</strong><button type="button" id="nextMonth" class="calendar-nav" aria-label="Mes siguiente">→</button></div><div class="calendar-legend"><span><i class="legend-dot has-readings"></i>Día con mediciones</span><span><i class="legend-dot"></i>Sin mediciones</span></div><div id="calendarGrid" class="calendar-grid" aria-label="Calendario mensual"></div><h4>Resumen de esta semana</h4><div id="weeklySummary" class="calendar-summary"><p class="empty">Cargando resumen semanal...</p></div><h4>Resumen del mes</h4><div id="calendarSummary" class="calendar-summary"><p class="empty">Cargando resumen mensual...</p></div><div class="selected-day"><h4 id="selectedDateTitle">Mediciones del día</h4><div id="historyList" class="record-list"><p class="empty">Cargando historial...</p></div></div></article>
+      </div>
+      <footer class="dashboard-footer"><span><span class="footer-mark">♥</span> A.M.A.R. <span class="footer-separator">/</span> Seguimiento personal</span><span>Tu información merece cuidado.</span></footer>
     </section>
+    <button type="button" id="manualSOS" class="sos-button"><span class="sos-icon" aria-hidden="true">!</span><span>Solicitar ayuda</span><span class="sos-suffix">SOS</span></button>
+    <nav class="mobile-nav" aria-label="Navegación móvil"><button type="button" class="active" data-panel="homeSection"><span>◫</span>Resumen</button><button type="button" data-panel="historySection"><span>⌁</span>Historial</button><button type="button" id="mobileAddDevice"><span>＋</span>Dispositivo</button><button type="button" id="mobileAddContact"><span>♧</span>Contactos</button></nav>
   </main>
-
-  <!-- Modal -->
-  <div id="modal" class="modal">
-    <div class="modal-card" id="modalContent"></div>
-  </div>
-
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-card" id="modalContent"></div></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-    <script src="js/core.js"></script>
+  <script src="js/core.js"></script>
   <script src="js/profile.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/devices.js"></script>
