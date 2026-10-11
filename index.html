@@ -103,6 +103,13 @@
           <h3>Frecuencia cardíaca</h3>
           <div class="heart">♥</div>
           <div class="bpm" id="bpm">--</div>
+          <div class="heartbeat-visual" aria-label="Animación visual vinculada a las lecturas, no es un electrocardiograma">
+            <svg viewBox="0 0 320 64" role="img" aria-hidden="true">
+              <path class="heartbeat-grid" d="M0 32H320"></path>
+              <path id="heartbeatWave" class="heartbeat-wave" d="M0 32 L55 32 L68 32 L78 22 L87 43 L100 5 L114 53 L126 32 L148 32 L160 32 L170 22 L179 43 L192 5 L206 53 L218 32 L240 32 L252 32 L262 22 L271 43 L284 5 L298 53 L310 32 L320 32"></path>
+            </svg>
+            <small>Visualización orientativa · no es un ECG</small>
+          </div>
           <div class="unit">latidos por minuto</div>
           <div id="heartState" class="state">Esperando lecturas del dispositivo</div>
           <button type="button" id="manualSOS" class="sos-button">
