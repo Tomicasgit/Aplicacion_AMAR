@@ -201,7 +201,7 @@
 
       const { data: contacts, error } = await supabaseClient
         .from("emergency_contacts")
-        .select("name, phone, email")
+        .select("id, name, phone, email")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -226,7 +226,7 @@
           : "";
 
         const emailLink = email
-          ? `<a class="email-button" href="mailto:${escapeContactHTML(email)}?subject=${encodeURIComponent("Alerta A.M.A.R.")}&body=${encodeURIComponent("Necesito que te comuniques conmigo. Revisá mi situación, por favor.")}">Redactar correo</a>`
+          ? `<button type="button" class="email-button" data-amar-send-email="${escapeContactHTML(contact.id)}" aria-label="Enviar aviso SOS por correo a ${name}">Enviar aviso por correo</button>`
           : "";
 
         // WhatsApp necesita el número en formato internacional, solo con dígitos.
@@ -948,11 +948,105 @@ let position = null;
   }
 
   // =========================================================
+  // ENVÍO DE CORREO SOS CON PLANTILLA PREDEFINIDA
+  // =========================================================
+
+  async function sendEmergencyEmail(contactId, button) {
+    if (!contactId || button?.disabled) return;
+    const previousText = button?.textContent || "Enviar aviso por correo";
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Enviando...";
+    }
+
+    if (typeof openModal === "function") {
+      openModal(`
+        <h2>Enviando aviso</h2>
+        <p>Enviando el correo de emergencia predefinido al contacto seleccionado.</p>
+      `);
+    }
+
+    try {
+      await getCurrentUser();
+      let position = null;
+      try {
+        position = await getCurrentPosition();
+      } catch (locationError) {
+        console.info("El aviso se enviará sin ubicación:", locationError.message);
+      }
+
+      const { data, error } = await supabaseClient.functions.invoke("amar-email", {
+        body: {
+          contact_id: contactId,
+          location: position ? {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          } : null
+        }
+      });
+
+      if (error) {
+        let detail = "";
+        try {
+          const payload = await error.context?.json?.();
+          detail = payload?.error || payload?.message || "";
+        } catch (_) {
+          // Usar el mensaje general del SDK si la respuesta no contiene JSON.
+        }
+        throw new Error(detail || error.message || "No se pudo enviar el correo.");
+      }
+      if (!data?.success) {
+        throw new Error(data?.error || "El servidor no confirmó el envío del correo.");
+      }
+
+      if (typeof openModal === "function") {
+        openModal(`
+          <h2>Correo enviado</h2>
+          <p>${escapeContactHTML(data.message || "El aviso se envió correctamente.")}</p>
+          <p>Destinatario: <strong>${escapeContactHTML(data.recipient || "")}</strong></p>
+          <p class="sos-disclaimer">El mensaje utiliza una plantilla de emergencia predefinida de A.M.A.R.</p>
+          <button type="button" class="primary" onclick="closeModal()">Entendido</button>
+        `);
+      }
+    } catch (error) {
+      console.error("No se pudo enviar el correo SOS:", error);
+      if (typeof openModal === "function") {
+        openModal(`
+          <h2>No se pudo enviar el correo</h2>
+          <p>${escapeContactHTML(error.message || "Ocurrió un error al enviar el aviso.")}</p>
+          <p class="sos-disclaimer">El correo no se considera enviado si el servidor no lo confirma.</p>
+          <button type="button" class="primary" onclick="closeModal()">Cerrar</button>
+        `);
+      }
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = previousText;
+      }
+    }
+  }
+
+  function initializeEmergencyEmailButtons() {
+    if (document.documentElement.dataset.amarEmailHandler === "true") return;
+    document.documentElement.dataset.amarEmailHandler = "true";
+
+    document.addEventListener("click", event => {
+      const button = event.target.closest("[data-amar-send-email]");
+      if (!button) return;
+      event.preventDefault();
+      sendEmergencyEmail(button.dataset.amarSendEmail, button);
+    });
+  }
+
+  // =========================================================
   // API PÚBLICA DEL MÓDULO
   // =========================================================
 
+  initializeEmergencyEmailButtons();
+
   window.AMARAlerts = {
     registerAlert,
+    sendEmergencyEmail,
     captureAndSaveLocation,
     evaluateReading,
     processReading,
