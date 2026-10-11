@@ -53,7 +53,7 @@ Los documentos están numerados para facilitar su lectura en orden. Las afirmaci
 | 14 | [Plan de pruebas y aceptación](docs/14-PLAN-DE-PRUEBAS-Y-ACEPTACION.md) | Casos AUTH, contactos, BLE, historial, SOS, correo y aceptación. |
 | 15 | [Decisiones técnicas y cambios](docs/15-DECISIONES-TECNICAS-Y-CAMBIOS.md) | Decisiones de arquitectura, historial y plantilla de bitácora. |
 | 16 | [Glosario y referencias](docs/16-GLOSARIO-Y-REFERENCIAS.md) | Terminología y documentación primaria de las tecnologías. |
-| 17 | [Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) | Constantes, pines, funciones, algoritmo de LPM y ciclo de ejecución. |
+| 17 | [Referencia del firmware](docs/17-REFERENCIA-FIRMWARE.md) | Fuente canónica v5.3 y distinción respecto de la copia histórica v4.1. |
 | 18 | [Manual de usuario](docs/18-MANUAL-DE-USUARIO.md) | Cómo acceder, conectar, leer, consultar historial, contactos y SOS. |
 | 19 | [Manual de mantenimiento](docs/19-MANUAL-DE-MANTENIMIENTO.md) | Diagnóstico por capas, publicación, recuperación y evidencia. |
 | 20 | [HTML, CSS y componentes](docs/20-HTML-CSS-Y-COMPONENTES.md) | Identificadores del HTML, cascada CSS, componentes y variables de diseño. |
