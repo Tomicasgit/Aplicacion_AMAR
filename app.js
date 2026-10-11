@@ -78,11 +78,15 @@
             '&': '&amp;', '<': '&lt;', '>': '&gt;',
             '"': '&quot;', "'": '&#39;'
           }[c]));
+          const safeConnectedName = String(connectedName || 'A.M.A.R').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;',
+            '"': '&quot;', "'": '&#39;'
+          }[c]));
 
           openModal(`
             <h2>ESP32 conectado</h2>
             <p><strong>${safeName}</strong> está conectado por Bluetooth.</p>
-            <p>Dispositivo detectado: ${connectedName}</p>
+            <p>Dispositivo detectado: ${safeConnectedName}</p>
             <p>Las lecturas válidas se enviarán a tu historial si Supabase permite guardarlas.</p>
             <button class="primary" onclick="closeModal();loadDashboard()">Entendido</button>
           `);
