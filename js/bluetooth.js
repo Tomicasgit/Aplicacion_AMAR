@@ -244,6 +244,7 @@
     readingPollTimer = null;
     lastPayloadSignature = '';
     lastTelemetryAt = 0;
+    window.AMARLiveReadingActive = false;
     characteristic = null;
     databaseDeviceId = null;
     currentUserId = null;
@@ -388,6 +389,8 @@
       }
 
       setConnectionStatus('Conectado');
+      // Evitar que una carga tardía del dashboard reemplace la lectura BLE en vivo.
+      window.AMARLiveReadingActive = true;
       console.info('Bluetooth conectado:', device.name);
 
       if (typeof window.loadDashboard === 'function') {
