@@ -19,8 +19,8 @@
 #include <BLE2902.h>
 
 // ============================================================
-// A.M.A.R. v4.1
-// ST7789 + MAX30102 + BLE
+// A.M.A.R. — Asistente de Monitoreo Autónomo de Ritmo
+// Firmware v4.1: ST7789 + MAX30102 + BLE
 // JSON + ISO 8601
 // Estados independientes del sensor y de la medición.
 // Sin Wi-Fi: la aplicación sincroniza la fecha y la hora.
