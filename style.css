@@ -1688,3 +1688,75 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   .dashboard .top { align-items: flex-start; }
   .dashboard .card:hover { transform: none; }
 }
+
+
+/* Acciones de contactos: una misma geometría para Llamar, Editar y Eliminar. */
+.record-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.record-actions > .call-button,
+.record-actions > .edit-button,
+.record-actions > .delete-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 1 1 88px;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  min-height: 40px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.record-actions > .call-button {
+  border-color: rgba(53,208,127,.18);
+  background: rgba(53,208,127,.13);
+  color: #7DE8A8;
+}
+.record-actions > .edit-button {
+  border-color: rgba(85,184,255,.2);
+  background: rgba(85,184,255,.13);
+  color: #83CCFF;
+}
+.record-actions > .delete-button {
+  border-color: rgba(255,93,112,.2);
+  background: rgba(255,93,112,.13);
+  color: #FF9AA7;
+}
+.record-actions > .call-button:hover,
+.record-actions > .edit-button:hover,
+.record-actions > .delete-button:hover {
+  filter: brightness(1.12);
+}
+.record-actions > .call-button:focus-visible,
+.record-actions > .edit-button:focus-visible,
+.record-actions > .delete-button:focus-visible {
+  outline: 2px solid #55B8FF;
+  outline-offset: 2px;
+}
+@media (max-width: 480px) {
+  .record-actions {
+    width: 100%;
+    gap: 6px;
+  }
+  .record-actions > .call-button,
+  .record-actions > .edit-button,
+  .record-actions > .delete-button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 42px;
+    padding-inline: 6px;
+  }
+}
