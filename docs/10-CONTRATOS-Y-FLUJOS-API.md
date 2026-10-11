@@ -106,3 +106,43 @@ Un SOS repetido puede generar más de una alerta si no se aplica una clave de id
 ## 9. Verificación del contrato real
 
 Este documento resume el contrato de la implementación existente. Para una especificación definitiva, extraer los campos de entrada y respuesta exactos de cada función en su código actual y mantener un ejemplo de request/response sanitizado en el repositorio. Nunca usar tokens reales en los ejemplos.
+
+
+## 10. Contrato actual del firmware canónico v5.3
+
+El firmware vigente se mantiene en [Tomicasgit/ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030), archivo [`Completop.ino`](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/Completop.ino). La copia `Completop.ino` de este repositorio web declara v4.1 y es histórica. Consultar [24 — Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md).
+
+### BLE GATT
+
+- Nombre anunciado: `A.M.A.R`.
+- Servicio: `4fafc201-1fb5-459e-8fcc-c5c9c331914b`.
+- Característica: `beb5483e-36e1-4688-b7f5-ea07361b26a8`.
+- Propiedades: READ, NOTIFY y WRITE.
+- Intervalo de actualización configurado: 800 ms.
+- WRITE se utiliza para recibir timestamp ISO 8601 desde la web.
+
+### Telemetría JSON
+
+```json
+{
+  "timestamp": "2026-10-11T09:25:30-03:00",
+  "lpm": 68,
+  "average": 66,
+  "sensor_state": "midiendo",
+  "user_state": "normal",
+  "quality": 4,
+  "alert": false
+}
+```
+
+Los valores son ilustrativos, no una medición real.
+
+- `timestamp`: ISO 8601 o `null` antes de sincronizar el reloj.
+- `lpm`: entero redondeado; 0 significa que no hay medición vigente.
+- `average`: promedio reciente; 0 si no hay medición vigente.
+- `sensor_state`: `error_sensor`, `sin_contacto`, `estabilizando`, `sin_datos` o `midiendo`.
+- `user_state`: `sin_datos`, `normal`, `precaucion` o `critico`.
+- `quality`: indicador heurístico 0–5, no un porcentaje ni una garantía de precisión.
+- `alert`: booleano que representa alerta crítica confirmada, no el envío de un SOS.
+
+El firmware actualiza el valor READ aunque no haya cliente y usa NOTIFY cuando detecta conexión. Por eso la aplicación debe gestionar tanto la lectura inicial como las notificaciones. Una conexión BLE no prueba que se recibió un JSON válido ni que una fila se guardó en Supabase.
