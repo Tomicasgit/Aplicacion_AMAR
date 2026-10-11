@@ -147,6 +147,92 @@
     };
   }
 
+
+  // =========================================================
+  // ACCESOS RÁPIDOS A CONTACTOS DE EMERGENCIA
+  // =========================================================
+
+  function escapeContactHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[char]);
+  }
+
+  async function buildEmergencyContactsHTML() {
+    try {
+      const user = await getCurrentUser();
+
+      const { data: contacts, error } = await supabaseClient
+        .from("emergency_contacts")
+        .select("name, phone, email")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      if (!contacts?.length) {
+        return `
+          <section class="sos-emergency-contacts">
+            <h3>Contactos de emergencia</h3>
+            <p>No tenés contactos registrados.</p>
+          </section>
+        `;
+      }
+
+      const items = contacts.map(contact => {
+        const name = escapeContactHTML(contact.name || "Contacto");
+        const phone = String(contact.phone || "").trim();
+        const email = String(contact.email || "").trim();
+
+        const callLink = phone
+          ? `<a class="call-button" href="tel:${escapeContactHTML(phone)}">Llamar</a>`
+          : "";
+
+        const emailLink = email
+          ? `<a class="email-button" href="mailto:${escapeContactHTML(email)}?subject=${encodeURIComponent("Alerta A.M.A.R.")}&body=${encodeURIComponent("Necesito que te comuniques conmigo. Revisá mi situación, por favor.")}">Redactar correo</a>`
+          : "";
+
+        return `
+          <li class="sos-contact-item">
+            <strong>${name}</strong>
+            <div class="record-actions">
+              ${callLink}
+              ${emailLink}
+            </div>
+            ${!phone && !email
+              ? "<small>Este contacto no tiene teléfono ni correo disponible.</small>"
+              : ""}
+          </li>
+        `;
+      }).join("");
+
+      return `
+        <section class="sos-emergency-contacts">
+          <h3>Contactos de emergencia</h3>
+          <p>Elegí una acción para comunicarte con un contacto.</p>
+          <ul class="sos-contact-list">${items}</ul>
+          <p class="sos-disclaimer">
+            Estas acciones abren la aplicación correspondiente.
+            No envían mensajes automáticamente.
+          </p>
+        </section>
+      `;
+    } catch (error) {
+      console.warn("No se pudieron cargar los contactos:", error);
+
+      return `
+        <section class="sos-emergency-contacts">
+          <h3>Contactos de emergencia</h3>
+          <p>No se pudieron cargar los contactos. Podés consultarlos desde la sección Contactos.</p>
+        </section>
+      `;
+    }
+  }
+
   // =========================================================
   // VALIDACIÓN DE TELEMETRÍA DEL ESP32
   // =========================================================
@@ -425,6 +511,8 @@ await requestSOSFunction({
         );
       }
 
+      const contactsHTML = await buildEmergencyContactsHTML();
+
       if (typeof openModal === "function") {
         openModal(`
           <h2>Alerta registrada</h2>
@@ -441,9 +529,11 @@ await requestSOSFunction({
             }
           </p>
 
+          ${contactsHTML}
+
           <p>
             <strong>
-              Esta acción no envía mensajes ni realiza llamadas.
+              La alerta quedó registrada. No se enviaron mensajes automáticamente.
             </strong>
           </p>
 
@@ -541,6 +631,8 @@ const alert = result.alert;
           error.message || locationMessage;
       }
 
+      const contactsHTML = await buildEmergencyContactsHTML();
+
       if (typeof openModal === "function") {
         openModal(`
           <div class="sos-confirmation">
@@ -561,10 +653,12 @@ const alert = result.alert;
               }
             </p>
 
+            ${contactsHTML}
+
             <p class="sos-disclaimer">
-              Esta acción no realiza llamadas ni envía mensajes
-              a tus contactos. Si necesitás asistencia inmediata,
-              contactá directamente a los servicios de emergencia.
+              Esta acción no envía mensajes automáticamente.
+              Si necesitás asistencia inmediata, contactá directamente
+              a los servicios de emergencia.
             </p>
 
             <button
