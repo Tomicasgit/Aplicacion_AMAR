@@ -183,7 +183,6 @@
       }
 
       updateReading(data);
-      updateReading(data);
       await saveReading(data);
     } catch (error) {
       console.error('No se pudo interpretar la telemetría A.M.A.R.:', error);
