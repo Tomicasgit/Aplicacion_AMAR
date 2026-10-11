@@ -7,8 +7,8 @@ El firmware vigente se mantiene en el repositorio separado **[Tomicasgit/ESP32_P
 La explicación completa y actualizada está en:
 
 - [24 — Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md)
-- [02 — Protocolo BLE y JSON del firmware](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/docs/02-PROTOCOLO-BLE.md)
-- [03 — Montaje, carga y pruebas](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/docs/03-MONTAJE-CARGA-Y-PRUEBAS.md)
+- [24 — Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md), que incluye UUID, protocolo JSON, montaje lógico, diagnóstico y plan de verificación.
+- [Sketch canónico v5.3](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/Completop.ino).
 
 ## Archivo histórico de este repositorio
 
