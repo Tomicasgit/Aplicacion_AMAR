@@ -1,60 +1,88 @@
-# A.M.A.R. — Asistente de Monitoreo Autónomo de Ritmo
+# A.M.A.R. — Documentación general
 
-A.M.A.R. es un prototipo de monitoreo de frecuencia cardíaca compuesto por una aplicación web y un dispositivo basado en ESP32.
+> **Nombre oficial:** A.M.A.R. — **Asistente de Monitoreo Autónomo de Ritmo**.  
+> **Estado:** prototipo académico de hardware + aplicación web.  
+> **Repositorio:** [Tomicasgit/Aplicacion_AMAR](https://github.com/Tomicasgit/Aplicacion_AMAR).
 
-La aplicación permite gestionar usuarios, perfiles, dispositivos vinculados, contactos de emergencia, historial de mediciones, ubicaciones y alertas. El dispositivo IdeaSpark ESP32 procesa lecturas del sensor MAX30102 y transmite las mediciones a la aplicación mediante Bluetooth Low Energy (BLE).
+A.M.A.R. es un prototipo pensado para registrar y visualizar mediciones de frecuencia cardíaca, conservar un historial consultable y facilitar que una persona solicite ayuda y notifique a sus contactos configurados. El sistema combina un dispositivo basado en ESP32 y sensor óptico MAX30102 con una aplicación web responsive.
 
-> A.M.A.R. es un prototipo de monitoreo. No diagnostica enfermedades ni reemplaza la atención médica profesional.
+**A.M.A.R. no diagnostica, no predice por sí solo un evento médico y no reemplaza un profesional, un electrocardiograma ni los servicios de emergencia.** Las mediciones y los estados mostrados dependen de la calidad del sensor, el firmware, la conexión y la configuración del sistema.
 
-## Tecnologías
+## Índice de documentación
 
-- HTML, CSS y JavaScript.
-- Supabase Auth y base de datos PostgreSQL.
-- Bluetooth Low Energy (BLE) para la comunicación con el dispositivo.
-- Arduino para el firmware del ESP32.
+| Documento | Qué explica |
+|---|---|
+| [Idea, alcance y requisitos](docs/01-PROYECTO-Y-ALCANCE.md) | Problema, propuesta, usuarios, objetivos, límites y flujo funcional. |
+| [Arquitectura y estructura](docs/02-ARQUITECTURA.md) | Componentes, flujo de datos, carpetas y responsabilidades. |
+| [Aplicación web](docs/03-APLICACION-WEB.md) | HTML, CSS, cada módulo JavaScript, navegación y eventos. |
+| [Hardware y firmware](docs/04-HARDWARE-Y-FIRMWARE.md) | Placa, sensor, pantalla, pines, lectura, BLE y formato de datos. |
+| [Backend, datos y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md) | Supabase, tablas usadas, autenticación, Edge Functions, correo y secretos. |
+| [Diseño y paleta](docs/06-DISENO-Y-PALETA.md) | Sistema visual, códigos hexadecimales, componentes y accesibilidad. |
+| [Pruebas, límites y cronología](docs/07-PRUEBAS-LIMITES-Y-CRONOLOGIA.md) | Qué verificar, limitaciones conocidas, mantenimiento y tiempo de desarrollo documentable. |
+| [Referencia completa de colores](README-PALETA.md) | Tabla de color y reglas de uso. |
 
-## Aplicación web
+## Vista rápida del sistema
 
-La interfaz principal se encuentra en `index.html`, con estilos en `style.css` y lógica general en `app.js`.
-
-Los módulos de `js/` separan las funciones de autenticación, perfiles, dispositivos, contactos, historial, panel principal, alertas y Bluetooth.
-
-La configuración pública del cliente Supabase se encuentra en `supabase-config.js`. Las claves secretas nunca deben incluirse en el código del navegador.
-
-## Identidad visual
-
-La interfaz utiliza la paleta **A.M.A.R. Pulse**, definida en `style.css`. La documentación de colores, códigos hexadecimales, usos y criterios de consistencia está en [`README-PALETA.md`](README-PALETA.md).
-
-## Firmware
-
-`Completop.ino` contiene el firmware del dispositivo. El hardware y sus conexiones deben verificarse en el propio código antes de modificarlo.
-
-## Publicación
-
-La aplicación web está preparada para publicarse como sitio estático, por ejemplo mediante GitHub Pages. La autenticación y los datos dependen de la configuración del proyecto Supabase y de sus políticas de seguridad.
-
-## Alertas por correo
-
-A.M.A.R. utiliza una **plantilla de emergencia predefinida** para que el usuario no tenga que redactar el mensaje. El botón **Enviar aviso por correo** invoca la Edge Function `amar-email`, que verifica que el contacto pertenezca al usuario autenticado y envía el mensaje mediante Resend. Si se concede el permiso de ubicación, el correo agrega un enlace a Google Maps.
-
-El envío real requiere configurar los secretos de Supabase y desplegar ambas funciones:
-
-- `RESEND_API_KEY`: clave privada de Resend (solo en el servidor).
-- `RESEND_FROM_EMAIL`: dirección remitente verificada en Resend, por ejemplo `A.M.A.R. <alertas@tu-dominio.com>`.
-
-```bash
-supabase secrets set RESEND_API_KEY=tu_clave_resend RESEND_FROM_EMAIL="A.M.A.R. <alertas@tu-dominio.com>"
-supabase functions deploy amar-email
-supabase functions deploy amar-sos
+```mermaid
+flowchart LR
+    S[MAX30102] --> F[Firmware ESP32]
+    F --> D[Pantalla ST7789]
+    F <-->|Bluetooth Low Energy| W[Aplicación web]
+    W --> A[Supabase Auth]
+    W --> DB[(PostgreSQL / Supabase)]
+    W --> E[Edge Functions]
+    E --> R[Resend]
+    R --> C[Correo del contacto]
 ```
 
-No pongas la clave de Resend en archivos del frontend ni en GitHub. El correo no se considera enviado hasta que la función devuelve confirmación. Si Resend está en modo de prueba, puede limitar los destinatarios a direcciones verificadas; para avisar a contactos reales, configurá y verificá un dominio remitente en Resend.
+El enlace BLE transporta lecturas del dispositivo a la web. Supabase se usa para autenticación y persistencia. La función `amar-sos` registra una alerta y, si está configurado Resend y existen destinatarios, intenta enviar un correo. La función `amar-email` permite enviar una plantilla a un contacto concreto cuando se utiliza ese flujo.
 
-Los botones de teléfono y WhatsApp abren la aplicación correspondiente para que la persona confirme el contacto. A.M.A.R. no realiza llamadas automáticas ni activa una alarma remota en el teléfono de los contactos.
+## Funciones principales
 
-## Seguridad y privacidad
+- Crear una cuenta e iniciar/cerrar sesión.
+- Configurar un perfil personal.
+- Vincular el dispositivo compatible por Bluetooth.
+- Ver las LPM recibidas, el estado de conexión y la hora de la última lectura.
+- Guardar y consultar mediciones e historial por fecha.
+- Gestionar dispositivos y contactos de emergencia.
+- Registrar una solicitud SOS manual y gestionar una alerta automática del flujo implementado.
+- Adjuntar ubicación cuando el usuario concede permiso y el navegador la obtiene.
+- Notificar contactos por correo mediante el backend cuando la configuración está activa.
+- Abrir el teléfono o WhatsApp para que la persona complete la comunicación manualmente.
 
-- Las tablas deben mantener políticas RLS adecuadas para restringir el acceso a los datos de cada usuario.
-- No publicar claves secretas de Supabase.
-- Probar el flujo de alertas en modo controlado para evitar notificaciones de emergencia involuntarias.
-- La ubicación y las mediciones cardíacas son datos sensibles y deben tratarse con cuidado.
+## Stack tecnológico
+
+| Capa | Tecnología | Responsabilidad |
+|---|---|---|
+| Interfaz | HTML5 | Estructura semántica de vistas, paneles, formularios y modales. |
+| Presentación | CSS3 | Diseño responsive, estados, animaciones y paleta. |
+| Lógica cliente | JavaScript | Navegación SPA, validación, CRUD, historial, BLE y SOS. |
+| Autenticación y datos | Supabase Auth + PostgreSQL | Identidad, acceso a datos y persistencia. |
+| Funciones de servidor | Supabase Edge Functions / Deno | Lógica protegida de alertas y correo. |
+| Envío de correo | Resend API | Transporte de mensajes desde el servidor. |
+| Dispositivo | Arduino/C++ sobre ESP32 | Lectura del MAX30102, pantalla y servidor BLE. |
+| Pantalla del dispositivo | ST7789, 170 × 320 | Estado local del sensor y del prototipo. |
+| Sensor | MAX30102 | Sensor óptico usado para estimar la frecuencia del pulso. |
+
+## Principios del proyecto
+
+1. **Separación de responsabilidades:** sensor y firmware adquieren/procesan; la web presenta y registra; Supabase autentica y persiste; las funciones del servidor realizan operaciones protegidas.
+2. **Privacidad:** no se debe incluir una clave privada de Resend ni secretos del servidor en JavaScript público.
+3. **Permisos explícitos:** ubicación y Bluetooth dependen del navegador, del sistema operativo y de la autorización del usuario.
+4. **Transparencia:** la interfaz debe distinguir una alerta registrada, un correo aceptado por el proveedor y una comunicación humana efectivamente recibida.
+5. **Accesibilidad:** no depender exclusivamente del color y respetar la preferencia de movimiento reducido.
+6. **Alcance sanitario prudente:** una lectura aislada o un estado visual no constituye diagnóstico.
+
+## Configuración resumida
+
+La web carga la configuración pública de Supabase desde `supabase-config.js`. La URL y la clave *anon/publishable* son valores de cliente; la seguridad de los datos debe estar reforzada con políticas RLS. Las claves privadas deben permanecer como secretos del proyecto Supabase.
+
+Para envío de correo mediante Resend, configurar los secretos del proyecto y desplegar las funciones correspondientes. Ver [Backend, datos y seguridad](docs/05-BACKEND-DATOS-Y-SEGURIDAD.md).
+
+## Documentación del tiempo de desarrollo
+
+El historial de trabajo documentado permite situar avances funcionales durante **octubre de 2026**, con cambios de firmware, Bluetooth, historial, SOS y correo. El repositorio por sí solo no demuestra las horas efectivas de trabajo; por eso no se inventa una cantidad de horas. El documento [Pruebas, límites y cronología](docs/07-PRUEBAS-LIMITES-Y-CRONOLOGIA.md) diferencia las fechas de actividad que pueden respaldarse del tiempo efectivo que requiere un registro horario.
+
+## Aviso importante
+
+Este proyecto es un prototipo académico. No debe usarse como único mecanismo de seguridad, no sustituye atención profesional y no garantiza que un contacto lea o responda un correo. Ante una emergencia real, contactar directamente al servicio de emergencias local.
