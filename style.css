@@ -1358,3 +1358,45 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     animation: none !important;
   }
 }
+
+
+/* Contacto directo y onda animada de A.M.A.R. */
+.record-actions .call-button,
+.record-actions .email-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 9px 13px;
+  border-radius: 9px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 750;
+}
+.record-actions .call-button { background: rgba(53,208,127,.13); color: #7DE8A8; }
+.record-actions .email-button { background: rgba(32,214,194,.12); color: #6DE6D9; }
+.record-actions .email-button[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+.heartbeat-visual {
+  width: min(100%, 320px);
+  margin: 10px 0 16px;
+  opacity: .58;
+  transition: opacity .25s ease;
+}
+.heartbeat-visual.is-live { opacity: 1; }
+.heartbeat-visual svg { display: block; width: 100%; height: auto; overflow: visible; }
+.heartbeat-grid { fill: none; stroke: #38516B; stroke-width: 1; stroke-dasharray: 3 6; }
+.heartbeat-wave {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 18 8;
+  animation: heartbeat-trace var(--beat-duration, 1s) linear infinite;
+  filter: drop-shadow(0 0 4px rgba(32,214,194,.45));
+}
+.heartbeat-visual small { display: block; margin-top: 3px; text-align: center; color: var(--muted); font-size: 10px; }
+@keyframes heartbeat-trace { to { stroke-dashoffset: -52; } }
+@media (prefers-reduced-motion: reduce) {
+  .heartbeat-wave { animation: none; }
+}
