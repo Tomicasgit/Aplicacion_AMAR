@@ -20,7 +20,7 @@ function activateDashboardSection(target) {
   const title = document.querySelector('.top-heading h1'), description = document.querySelector('.top-heading p');
   const copy = { homeSection:['Tu panel de salud','Un resumen claro de tus lecturas y tu dispositivo A.M.A.R.'],
     historySection:['Seguimiento cardíaco','Revisá las mediciones guardadas y consultá tu evolución por fecha.'],
-    profileSection:['Mi perfil','Tus datos personales y las preferencias de tu aplicación.'] }[target];
+    profileSection:['Mi perfil','Tus datos personales y la información de tu cuenta.'] }[target];
   if (title && description && copy) { title.textContent = copy[0]; description.textContent = copy[1]; }
   window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
@@ -28,6 +28,19 @@ document.querySelectorAll('[data-panel]').forEach(button => {
   button.setAttribute('aria-pressed', String(button.classList.contains('active')));
   button.addEventListener('click', () => activateDashboardSection(button.dataset.panel));
 });
+document.querySelectorAll('[data-show]').forEach(button => button.addEventListener('click', event => {
+  const target = button.dataset.show;
+  if (!target) return;
+  if (button.tagName === 'A') event.preventDefault();
+  message('#loginMessage', ''); message('#registerMessage', '');
+  show(target);
+}));
+document.querySelectorAll('[data-scroll-to]').forEach(button => button.addEventListener('click', () => {
+  show('welcomeView');
+  window.setTimeout(() => document.getElementById(button.dataset.scrollTo)?.scrollIntoView({
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'
+  }), 60);
+}));
 function message(id, text, isSuccess = false) {
   const element = $(id); if (!element) return;
   element.textContent = text; element.className = isSuccess ? 'message success' : 'message';
