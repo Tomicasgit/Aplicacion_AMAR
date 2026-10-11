@@ -14,7 +14,7 @@
     <section class="welcome-hero"><div class="welcome-copy"><span class="eyebrow"><span class="status-dot"></span> MONITOREO PERSONAL, MÁS SIMPLE</span><h1>Tu bienestar, <span>más cerca.</span></h1><p>A.M.A.R. conecta tu dispositivo con un espacio sencillo para consultar tus lecturas, revisar tu evolución y organizar tus contactos de emergencia.</p><div class="welcome-actions"><button type="button" class="primary hero-primary" data-show="registerView">Comenzar gratis <span aria-hidden="true">→</span></button><button type="button" class="secondary hero-secondary" data-show="loginView">Ya tengo una cuenta</button></div><p class="welcome-note">Un apoyo para el seguimiento personal. No reemplaza la consulta médica.</p></div>
     <div class="welcome-art" role="img" aria-label="Ilustración de un dispositivo de monitoreo cardíaco"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-device"><div class="art-device-top"><span></span><span></span><span></span><small>A.M.A.R.</small></div><div class="art-screen"><div class="art-heart">♥</div><svg viewBox="0 0 240 70" aria-hidden="true"><path d="M2 38H52L68 20L88 55L108 8L132 45L148 30L160 38H238" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span>MONITOREO PERSONAL</span></div></div><div class="art-floating-card"><span class="floating-icon">♡</span><div><strong>Tu historial</strong><small>Organizado por fecha</small></div></div><span class="art-spark spark-one">+</span><span class="art-spark spark-two">·</span></div></section>
     <section class="welcome-features"><article class="feature-card"><span class="feature-icon">⌁</span><h2>Conectá tu dispositivo</h2><p>Vinculá el ESP32 compatible y consultá las lecturas que se registren.</p></article><article class="feature-card"><span class="feature-icon">▦</span><h2>Revisá tu evolución</h2><p>Encontrá las mediciones guardadas con un calendario y resúmenes claros.</p></article><article class="feature-card"><span class="feature-icon">♡</span><h2>Tené tus contactos a mano</h2><p>Organizá contactos y consultá las alertas registradas en tu cuenta.</p></article></section>
-    <section class="welcome-about" id="acerca"><div><span class="eyebrow">ACERCA DE A.M.A.R.</span><h2>Información clara para acompañar tu seguimiento.</h2></div><div class="about-copy"><p><strong>¿Qué es?</strong> A.M.A.R. significa Alerta de Latidos y Monitoreo Autónomo. Es un prototipo compuesto por un dispositivo wearable y una aplicación web.</p><p><strong>¿Cómo funciona?</strong> El sensor obtiene lecturas, el dispositivo compatible las transmite a la aplicación y, cuando se guardan correctamente, podés consultarlas en el historial. También podés gestionar contactos y revisar alertas registradas.</p><p><strong>¿Para qué sirve?</strong> Facilita el registro y la consulta de datos durante el seguimiento personal o una conversación con profesionales de salud. No diagnostica, no garantiza detectar emergencias y no sustituye la atención médica.</p><p class="contact-line">¿Consultas o sugerencias? <a href="mailto:castillotomas095@gmail.com">castillotomas095@gmail.com</a></p></div></section><footer class="welcome-footer"><span>© A.M.A.R. · Proyecto de monitoreo personal</span><a href="mailto:castillotomas095@gmail.com">Contacto</a><a href="#acerca">Acerca de</a></footer>
+    <section class="welcome-about" id="acerca"><div><span class="eyebrow">ACERCA DE A.M.A.R.</span><h2>Información clara para acompañar tu seguimiento.</h2></div><div class="about-copy"><p><strong>¿Qué es?</strong> A.M.A.R. significa Alerta de Latidos y Monitoreo Autónomo. Es un prototipo compuesto por un dispositivo wearable y una aplicación web.</p><p><strong>¿Cómo funciona?</strong> El sensor obtiene lecturas, el dispositivo compatible las transmite a la aplicación y, cuando se guardan correctamente, podés consultarlas en el historial. También podés gestionar contactos y revisar alertas registradas.</p><p><strong>¿Para qué sirve?</strong> Facilita el registro y la consulta de datos durante el seguimiento personal o una conversación con profesionales de salud. No diagnostica, no garantiza detectar emergencias y no sustituye la atención médica.</p><p class="contact-line">¿Consultas o sugerencias? <a href="mailto:castillotomas095@gmail.com">castillotomas095@gmail.com</a></p></div></section><footer class="welcome-footer"><span>© A.M.A.R. · Proyecto de monitoreo personal</span><a href="mailto:castillotomas095@gmail.com">Contacto</a><button type="button" class="footer-link" data-scroll-to="acerca">Acerca de</button></footer>
   </main>
 
   <!-- Vista: Iniciar sesión -->
@@ -29,6 +29,7 @@
     </aside>
     <section class="auth-panel">
       <form id="loginForm" class="form">
+        <button type="button" class="auth-back" data-show="welcomeView"><span aria-hidden="true">←</span> Volver a la bienvenida</button>
         <h2>Iniciar sesión</h2>
         <p class="lead">Ingresá para consultar tu panel de monitoreo.</p>
         <div class="field">
@@ -59,6 +60,7 @@
     </aside>
     <section class="auth-panel">
       <form id="registerForm" class="form">
+        <button type="button" class="auth-back" data-show="welcomeView"><span aria-hidden="true">←</span> Volver a la bienvenida</button>
         <h2>Crear cuenta</h2>
         <p class="lead">Tus datos se guardan de forma segura.</p>
         <div class="field">
@@ -128,7 +130,7 @@
           <div class="card-heading-row"><div><span class="eyebrow">HOY</span><h3>Resumen de mediciones</h3></div><span class="summary-pill">Resumen rápido</span></div>
           <div id="dailySummary" class="calendar-summary daily-summary-collapsed">
             <p class="empty">Cargando resumen diario...</p>
-          </div><button type="button" id="toggleDailySummary" class="inline-action" aria-expanded="false">Ver todas las estadísticas <span aria-hidden="true">↓</span></button>
+          </div><div id="dailyReadingsList" class="daily-readings-list" hidden></div><button type="button" id="toggleDailySummary" class="inline-action" aria-expanded="false">Ver todo el registro del día <span aria-hidden="true">↓</span></button>
         </article>
 
 
@@ -162,7 +164,7 @@
       </div>
 
         <div id="profileSection" class="dashboard-section profile-section">
-          <article class="card profile-intro"><div class="profile-avatar" id="profileAvatar" aria-hidden="true">A</div><div><span class="eyebrow">TU ESPACIO PERSONAL</span><h2 id="profileHeading">Mi perfil</h2><p>Actualizá tus datos y elegí cómo querés ver A.M.A.R.</p></div></article>
+          <article class="card profile-intro"><div class="profile-avatar-wrap"><img id="profileAvatarImage" class="profile-avatar-image" alt="Foto de perfil" hidden><div class="profile-avatar" id="profileAvatar" aria-hidden="true">A</div></div><div><span class="eyebrow">TU ESPACIO PERSONAL</span><h2 id="profileHeading">Mi perfil</h2><p>Actualizá tus datos personales y la información de tu cuenta.</p></div></article>
           <article class="card profile-form-card"><h3>Información personal</h3><p class="section-help">Solo el nombre y el correo de tu cuenta son necesarios. Los demás campos son opcionales.</p>
             <form id="profileForm"><div class="profile-fields">
               <div class="field"><label for="profileName">Nombre completo</label><input id="profileName" maxlength="100" autocomplete="name" required></div>
@@ -170,7 +172,7 @@
               <div class="field"><label for="profilePhone">Teléfono <span class="optional-label">Opcional</span></label><input id="profilePhone" type="tel" maxlength="40" autocomplete="tel"></div>
               <div class="field"><label for="profileBirthdate">Fecha de nacimiento <span class="optional-label">Opcional</span></label><input id="profileBirthdate" type="date" autocomplete="bday"></div>
               <div class="field"><label for="profileCity">Localidad <span class="optional-label">Opcional</span></label><input id="profileCity" maxlength="100" autocomplete="address-level2"></div>
-            </div><div class="profile-preferences"><div><strong>Apariencia</strong><p>Elegí el tema que te resulte más cómodo.</p></div><label class="theme-choice" for="profileTheme">Tema<select id="profileTheme"><option value="light">Claro</option><option value="dark">Oscuro</option><option value="system">Según mi dispositivo</option></select></label></div>
+            </div><div class="profile-photo-controls"><div><strong>Foto de perfil</strong><p>Opcional · JPG, PNG o WebP (máximo 3 MB)</p></div><input id="profilePhotoFile" type="file" accept="image/png,image/jpeg,image/webp"><button type="button" class="secondary photo-upload-button" id="uploadProfilePhoto">Guardar foto</button></div>
             <div class="profile-actions"><button type="submit" class="primary">Guardar cambios</button><button type="button" class="secondary" id="resetProfile">Descartar cambios</button></div><p id="profileMessage" class="message" role="status" aria-live="polite"></p></form>
           </article><article class="card privacy-note"><span class="feature-icon">◇</span><div><h3>Tu información</h3><p>Completá únicamente los datos que quieras guardar en tu cuenta. No ingreses información médica innecesaria. Las preferencias visuales no cambian cómo se interpretan las mediciones.</p></div></article>
         </div>
