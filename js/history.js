@@ -56,6 +56,17 @@ let heartReadings = [];
         </div>
         ${readings.length ? '' : '<p class="empty">Todavía no hay mediciones registradas hoy.</p>'}
       `;
+      const dailyList = $('#dailyReadingsList');
+      if (dailyList) {
+        dailyList.innerHTML = readings.length ? `
+          <h4>Registro de hoy · ${readings.length} ${readings.length === 1 ? 'medición' : 'mediciones'}</h4>
+          <div class="daily-reading-items">${[...readings].sort((a,b) => new Date(b.recorded_at)-new Date(a.recorded_at)).map(reading => {
+            const date = new Date(reading.recorded_at);
+            const time = Number.isNaN(date.getTime()) ? 'Hora no disponible' : date.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+            const lpm = Number(reading.lpm);
+            return '<div class="daily-reading-item"><span>'+time+'</span><strong>'+(Number.isFinite(lpm)&&lpm>0?lpm+' LPM':'—')+'</strong></div>';
+          }).join('')}</div>` : '<p class="empty">No hay mediciones para mostrar hoy.</p>';
+      }
     }
 
     function renderWeeklySummary() {
@@ -256,11 +267,14 @@ let heartReadings = [];
       renderCalendar();
     });
 
+
 document.querySelector('#toggleDailySummary')?.addEventListener('click', event => {
   const button = event.currentTarget, summary = document.querySelector('#dailySummary');
-  if (!summary) return;
+  const list = document.querySelector('#dailyReadingsList');
+  if (!summary || !list) return;
   const expanded = button.getAttribute('aria-expanded') !== 'true';
   summary.classList.toggle('daily-summary-collapsed', !expanded);
+  list.hidden = !expanded;
   button.setAttribute('aria-expanded', String(expanded));
-  button.innerHTML = expanded ? 'Mostrar resumen compacto <span aria-hidden="true">↑</span>' : 'Ver todas las estadísticas <span aria-hidden="true">↓</span>';
+  button.innerHTML = expanded ? 'Ver menos <span aria-hidden="true">↑</span>' : 'Ver todo el registro del día <span aria-hidden="true">↓</span>';
 });

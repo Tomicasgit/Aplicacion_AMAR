@@ -2,12 +2,21 @@
     async function loadContacts(userId) {
       const list = $('#contactsList');
 
-      const { data, error } = await supabaseClient
+      let { data, error } = await supabaseClient
         .from('emergency_contacts')
-        .select('id, name, phone, relationship')
+        .select('id, name, phone, email, relationship')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
+      // Compatibilidad temporal si aún no se ejecutó la migración de email.
+      if (error && /email|column|schema cache/i.test(error.message || '')) {
+        const fallback = await supabaseClient.from('emergency_contacts')
+          .select('id, name, phone, relationship')
+          .eq('user_id', userId).order('created_at', { ascending: false });
+        if (fallback.error) throw fallback.error;
+        data = fallback.data.map(contact => ({ ...contact, email: null }));
+        error = null;
+      }
       if (error) throw error;
 
       $('#contactsCount').textContent = data.length;
@@ -22,6 +31,8 @@
           <div class="record-info">
             <strong>${escapeHTML(contact.name)}</strong>
             <small>Teléfono: ${escapeHTML(contact.phone)}</small>
+            <br>
+            <small>Correo: ${escapeHTML(contact.email || 'No especificado')}</small>
             <br>
             <small>Relación: ${escapeHTML(contact.relationship || 'No especificada')}</small>
           </div>
@@ -67,6 +78,10 @@
                 value="${escapeHTML(data.phone)}">
             </div>
             <div class="field">
+              <label for="editContactEmail">Correo electrónico (opcional)</label>
+              <input id="editContactEmail" type="email" maxlength="254" value="${escapeHTML(data.email || '')}">
+            </div>
+            <div class="field">
               <label for="editContactRelation">Relación</label>
               <input id="editContactRelation" maxlength="100"
                 value="${escapeHTML(data.relationship || '')}">
@@ -82,17 +97,22 @@
           const name = $('#editContactName').value.trim();
           const phone = $('#editContactPhone').value.trim();
           const relationship = $('#editContactRelation').value.trim();
+          const email = $('#editContactEmail').value.trim();
 
           if (!name || !phone) {
             return alert('Completá el nombre y el teléfono.');
           }
 
-          const { error: updateError } = await supabaseClient
-            .from('emergency_contacts')
-            .update({ name, phone, relationship: relationship || null })
-            .eq('id', id)
-            .eq('user_id', auth.user.id);
-
+          let { error: updateError } = await supabaseClient.from('emergency_contacts')
+            .update({ name, phone, email: email || null, relationship: relationship || null })
+            .eq('id', id).eq('user_id', auth.user.id);
+          if (updateError && /email|column|schema cache/i.test(updateError.message || '')) {
+            if (email) return alert('Para guardar el correo del contacto, ejecutá la migración SQL de A.M.A.R. en Supabase.');
+            const fallback = await supabaseClient.from('emergency_contacts')
+              .update({ name, phone, relationship: relationship || null })
+              .eq('id', id).eq('user_id', auth.user.id);
+            updateError = fallback.error;
+          }
           if (updateError) return alert(updateError.message);
 
           closeModal();

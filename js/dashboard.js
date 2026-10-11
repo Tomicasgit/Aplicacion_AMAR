@@ -9,7 +9,7 @@
         }
 
         if (!user) {
-          show('loginView');
+          show('welcomeView');
           return;
         }
 

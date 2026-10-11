@@ -35,7 +35,11 @@
         </div>
         <div class="field">
           <label>Teléfono</label>
-          <input id="contactPhone" required>
+          <input id="contactPhone" type="tel" required maxlength="40">
+        </div>
+        <div class="field">
+          <label>Correo electrónico (opcional)</label>
+          <input id="contactEmail" type="email" maxlength="254" placeholder="contacto@correo.com">
         </div>
         <div class="field">
           <label>Relación</label>
@@ -97,20 +101,23 @@
           const name = $('#contactName').value.trim();
           const phone = $('#contactPhone').value.trim();
           const relationship = $('#contactRelation').value.trim();
+          const email = $('#contactEmail').value.trim();
 
           if (!name || !phone) {
             throw new Error('Completá el nombre y el teléfono del contacto.');
           }
 
-          const { error } = await supabaseClient
-            .from('emergency_contacts')
-            .insert({
-              user_id: userId,
-              name,
-              phone,
-              relationship: relationship || null
+          let { error } = await supabaseClient.from('emergency_contacts').insert({
+            user_id: userId, name, phone, email: email || null, relationship: relationship || null
+          });
+          if (error && /email|column|schema cache/i.test(error.message || '') && !email) {
+            const fallback = await supabaseClient.from('emergency_contacts').insert({
+              user_id: userId, name, phone, relationship: relationship || null
             });
-
+            error = fallback.error;
+          } else if (error && /email|column|schema cache/i.test(error.message || '') && email) {
+            throw new Error('Para guardar el correo del contacto, ejecutá la migración SQL de A.M.A.R. en Supabase.');
+          }
           if (error) throw error;
 
           closeModal();
