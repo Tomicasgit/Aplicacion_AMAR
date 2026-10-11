@@ -85,3 +85,12 @@ El firmware declara que no usa Wi-Fi para sincronizar hora y que la aplicación 
 ## 8. Seguridad y limitaciones
 
 No usar el prototipo para decidir tratamientos, suspender medicación o descartar síntomas. Si una persona presenta síntomas importantes, debe buscar asistencia médica sin esperar a que A.M.A.R. responda. El firmware y la interfaz no son un dispositivo médico certificado.
+
+
+## Actualización de fuente de verdad del firmware
+
+El firmware vigente se mantiene en el repositorio separado [Tomicasgit/ESP32_Proyecto2030](https://github.com/Tomicasgit/ESP32_Proyecto2030), archivo [`Completop.ino`](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/Completop.ino), versión declarada v5.3. La copia `Completop.ino` de este repositorio web declara v4.1 y es histórica.
+
+La placa de referencia actual es la IdeaSpark ESP32 con ST7789 integrada de 170 × 320 y sensor externo MAX30102. El firmware v5.3 usa I²C SDA 25/SCL 26 a 100 kHz; pantalla SPI MOSI 23, SCLK 18, CS 15, DC 2, RST 4 y BL 32. No usa Wi-Fi: la web sincroniza fecha/hora por BLE.
+
+Consultar [24 — Referencia completa del firmware v5.3](24-REFERENCIA-FIRMWARE-V5.3.md) para algoritmo, estados, parámetros y telemetría; consultar el [plan de montaje y pruebas](https://github.com/Tomicasgit/ESP32_Proyecto2030/blob/main/docs/03-MONTAJE-CARGA-Y-PRUEBAS.md) antes de considerar validado el hardware.
