@@ -24,13 +24,13 @@
     const waveform = document.querySelector('#heartbeatWave');
     const waveformBox = document.querySelector('.heartbeat-visual');
 
+    // La calidad orienta sobre la estabilidad, pero no debe ocultar
+    // una estimación LPM válida que el firmware ya está transmitiendo.
     const validReading =
       Number.isInteger(data.lpm) &&
       data.lpm > 0 &&
       data.lpm <= 300 &&
-      data.sensor_state === 'midiendo' &&
-      Number.isFinite(data.quality) &&
-      data.quality >= 3;
+      data.sensor_state === 'midiendo';
 
     if (validReading) {
       if (waveformBox) {
@@ -47,7 +47,12 @@
       if (readingTime) {
         readingTime.textContent = new Date().toLocaleTimeString('es-AR');
       }
-      if (heartState) heartState.textContent = 'Monitoreando';
+      if (heartState) {
+        heartState.textContent =
+          Number.isFinite(data.quality) && data.quality >= 3
+            ? 'Monitoreando'
+            : 'Lectura recibida · señal estabilizándose';
+      }
       return;
     }
 
@@ -152,6 +157,7 @@
     try {
       const json = new TextDecoder().decode(bytes);
       const data = JSON.parse(json);
+      console.debug('A.M.A.R. — telemetría BLE recibida:', data);
 
       if (window.AMARAlerts?.processReading) {
         const resultado = window.AMARAlerts.processReading(data);
