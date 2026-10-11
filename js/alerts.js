@@ -711,6 +711,7 @@ let position = null;
         }
       }
 
+      await refreshDashboardSafely();
       const contactsHTML = await buildEmergencyContactsHTML();
 
       if (typeof openModal === "function") {
