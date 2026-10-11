@@ -7,7 +7,7 @@
   let databaseDeviceId = null;
   let currentUserId = null;
   let lastSeenUpdate = 0;
-  let lastReadingSavedAt = 0;
+  let lastReadingAttemptAt = 0;
   const READING_SAVE_INTERVAL_MS = 15000;
   let savingReading = false;
   let readingErrorShown = false;
@@ -55,12 +55,13 @@
       data.lpm <= 0 ||
       data.lpm > 300 ||
       savingReading ||
-      Date.now() - lastReadingSavedAt < READING_SAVE_INTERVAL_MS
+      Date.now() - lastReadingAttemptAt < READING_SAVE_INTERVAL_MS
     ) {
       return;
     }
 
     savingReading = true;
+    lastReadingAttemptAt = Date.now();
 
     try {
       const parsedDate = data.timestamp ? Date.parse(data.timestamp) : NaN;
@@ -79,7 +80,6 @@
       if (error) throw error;
 
       readingErrorShown = false;
-      lastReadingSavedAt = Date.now();
 
       // Mantener el historial y los resúmenes sincronizados sin recargar la página.
       if (typeof heartReadings !== 'undefined' && Array.isArray(heartReadings)) {
