@@ -1,18 +1,35 @@
-let heartReadings = [];
-    let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    let selectedCalendarDate = localDateKey(new Date());
+const AMAR_TIME_ZONE = 'America/Argentina/Buenos_Aires';
+
+    function argentinaDateParts(date) {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: AMAR_TIME_ZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(date);
+      return Object.fromEntries(
+        parts.filter(part => ['year', 'month', 'day'].includes(part.type))
+          .map(part => [part.type, part.value])
+      );
+    }
 
     function localDateKey(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      const parts = argentinaDateParts(date);
+      return `${parts.year}-${parts.month}-${parts.day}`;
     }
 
     function dateFromKey(key) {
-      const [y, m, d] = key.split('-').map(Number);
-      return new Date(y, m - 1, d);
+      return new Date(`${key}T12:00:00-03:00`);
     }
+
+    let heartReadings = [];
+    const initialArgentinaDate = argentinaDateParts(new Date());
+    let calendarMonth = new Date(
+      Number(initialArgentinaDate.year),
+      Number(initialArgentinaDate.month) - 1,
+      1
+    );
+    let selectedCalendarDate = localDateKey(new Date());
 
     function readingsForDate(key) {
       return heartReadings.filter(r => {
@@ -62,23 +79,28 @@ let heartReadings = [];
       const container = $('#weeklySummary');
       if (!container) return;
 
-      const today = new Date();
-      const monday = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-
-      const weekday = (monday.getDay() + 6) % 7;
-      monday.setDate(monday.getDate() - weekday);
+      const todayKey = localDateKey(new Date());
+      const [year, month, day] = todayKey.split('-').map(Number);
+      const monday = new Date(Date.UTC(year, month - 1, day));
+      const weekday = (monday.getUTCDay() + 6) % 7;
+      monday.setUTCDate(monday.getUTCDate() - weekday);
 
       const sunday = new Date(monday);
-      sunday.setDate(sunday.getDate() + 7);
+      sunday.setUTCDate(sunday.getUTCDate() + 7);
+
+      const dateKeyFromUTC = date => [
+        date.getUTCFullYear(),
+        String(date.getUTCMonth() + 1).padStart(2, '0'),
+        String(date.getUTCDate()).padStart(2, '0')
+      ].join('-');
+      const mondayKey = dateKeyFromUTC(monday);
+      const sundayKey = dateKeyFromUTC(sunday);
 
       const rows = heartReadings.filter(reading => {
         const date = new Date(reading.recorded_at);
-        return !Number.isNaN(date.getTime()) &&
-          date >= monday && date < sunday;
+        if (Number.isNaN(date.getTime())) return false;
+        const key = localDateKey(date);
+        return key >= mondayKey && key < sundayKey;
       });
 
       const values = rows
@@ -121,7 +143,7 @@ let heartReadings = [];
       const rows = heartReadings.filter(r => {
         const d = new Date(r.recorded_at);
         return !Number.isNaN(d.getTime()) &&
-          d.getFullYear() === year && d.getMonth() === month;
+          localDateKey(d).startsWith(`${year}-${String(month + 1).padStart(2, '0')}-`);
       });
 
       const days = new Set(rows.map(r => localDateKey(new Date(r.recorded_at))));
@@ -162,7 +184,11 @@ let heartReadings = [];
         const date = new Date(r.recorded_at);
         const time = Number.isNaN(date.getTime())
           ? 'Hora no disponible'
-          : date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+          : date.toLocaleTimeString('es-AR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: AMAR_TIME_ZONE
+            });
 
         return `<div class="record-item"><div class="record-info">
           <strong>${escapeHTML(String(r.lpm))} LPM</strong>
@@ -247,7 +273,12 @@ let heartReadings = [];
 
       heartReadings = allReadings;
       selectedCalendarDate = localDateKey(new Date());
-      calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const currentArgentinaDate = argentinaDateParts(new Date());
+      calendarMonth = new Date(
+        Number(currentArgentinaDate.year),
+        Number(currentArgentinaDate.month) - 1,
+        1
+      );
       renderDailySummary();
       renderCalendar();
     }
