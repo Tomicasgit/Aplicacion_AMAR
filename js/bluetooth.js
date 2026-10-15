@@ -7,9 +7,9 @@
   let databaseDeviceId = null;
   let currentUserId = null;
   let lastSeenUpdate = 0;
-  let lastReadingAttemptAt = 0;
-  const READING_SAVE_INTERVAL_MS = 60000;
-  let savingReading = false;
+  let lastQueuedReadingId = null;
+  const readingQueue = [];
+  let processingReadingQueue = false;
   let readingErrorShown = false;
 
   function setConnectionStatus(text) {
@@ -45,7 +45,9 @@
       }
       if (bpm) bpm.textContent = String(data.lpm);
       if (readingTime) {
-        readingTime.textContent = new Date().toLocaleTimeString('es-AR');
+        readingTime.textContent = new Date().toLocaleTimeString('es-AR', {
+          timeZone: 'America/Argentina/Buenos_Aires'
+        });
       }
       if (heartState) heartState.textContent = 'Monitoreando';
       return;
@@ -69,75 +71,91 @@
   }
 
   async function saveReading(data) {
-    if (
-      !currentUserId ||
-      !Number.isFinite(data.lpm) ||
-      !Number.isInteger(data.lpm) ||
-      data.lpm <= 0 ||
-      data.lpm > 300 ||
-      data.sensor_state !== 'midiendo' ||
-      !Number.isFinite(data.quality) ||
-      data.quality < 3 ||
-      savingReading ||
-      Date.now() - lastReadingAttemptAt < READING_SAVE_INTERVAL_MS
-    ) {
-      return;
-    }
+    const readingId = Number(data.reading_id);
+    const validReading =
+      currentUserId &&
+      Number.isInteger(readingId) &&
+      readingId >= 0 &&
+      Number.isInteger(data.lpm) &&
+      data.lpm > 0 &&
+      data.lpm <= 300 &&
+      data.sensor_state === 'midiendo' &&
+      Number.isFinite(data.quality) &&
+      data.quality >= 3;
 
-    savingReading = true;
-    lastReadingAttemptAt = Date.now();
+    if (!validReading || readingId === lastQueuedReadingId) return;
+
+    // El ID solo cambia cuando el ESP32 calcula una nueva medición válida.
+    // Así no se guardan copias por cada notificación BLE repetida.
+    lastQueuedReadingId = readingId;
+    readingQueue.push({ ...data });
+    void processReadingQueue();
+  }
+
+  async function processReadingQueue() {
+    if (processingReadingQueue) return;
+    processingReadingQueue = true;
 
     try {
-      const parsedDate = data.timestamp ? Date.parse(data.timestamp) : NaN;
-      const recordedAt = Number.isFinite(parsedDate)
-        ? new Date(parsedDate).toISOString()
-        : new Date().toISOString();
+      while (readingQueue.length) {
+        const data = readingQueue.shift();
+        const userId = currentUserId;
+        if (!userId) continue;
 
-      const { error } = await supabaseClient
-        .from('heart_readings')
-        .insert({
-          user_id: currentUserId,
-          lpm: data.lpm,
-          recorded_at: recordedAt
-        });
+        try {
+          const parsedDate = data.timestamp ? Date.parse(data.timestamp) : NaN;
+          const recordedAt = Number.isFinite(parsedDate)
+            ? new Date(parsedDate).toISOString()
+            : new Date().toISOString();
 
-      if (error) throw error;
+          const { error } = await supabaseClient
+            .from('heart_readings')
+            .insert({
+              user_id: userId,
+              lpm: data.lpm,
+              recorded_at: recordedAt
+            });
 
-      readingErrorShown = false;
+          if (error) throw error;
 
-      // Mantener el historial y los resúmenes sincronizados sin recargar la página.
-      if (typeof heartReadings !== 'undefined' && Array.isArray(heartReadings)) {
-        heartReadings.push({ lpm: data.lpm, recorded_at: recordedAt });
-        if (typeof renderDailySummary === 'function') renderDailySummary();
-        if (typeof renderCalendar === 'function') renderCalendar();
-      }
+          readingErrorShown = false;
 
-      const now = Date.now();
-      if (databaseDeviceId && now - lastSeenUpdate >= 15000) {
-        lastSeenUpdate = now;
+          // Reflejar cada inserción en el historial abierto y los resúmenes.
+          if (typeof heartReadings !== 'undefined' && Array.isArray(heartReadings)) {
+            heartReadings.push({ lpm: data.lpm, recorded_at: recordedAt });
+            if (typeof renderDailySummary === 'function') renderDailySummary();
+            if (typeof renderCalendar === 'function') renderCalendar();
+          }
 
-        const { error: updateError } = await supabaseClient
-          .from('devices')
-          .update({ last_seen_at: new Date(now).toISOString() })
-          .eq('id', databaseDeviceId)
-          .eq('user_id', currentUserId);
+          const now = Date.now();
+          if (databaseDeviceId && now - lastSeenUpdate >= 15000) {
+            lastSeenUpdate = now;
 
-        if (updateError) {
-          console.error('No se pudo actualizar last_seen_at:', updateError);
+            const { error: updateError } = await supabaseClient
+              .from('devices')
+              .update({ last_seen_at: new Date(now).toISOString() })
+              .eq('id', databaseDeviceId)
+              .eq('user_id', userId);
+
+            if (updateError) {
+              console.error('No se pudo actualizar last_seen_at:', updateError);
+            }
+          }
+        } catch (error) {
+          console.error('Error al guardar la lectura en Supabase:', error);
+
+          if (!readingErrorShown) {
+            readingErrorShown = true;
+            alert(
+              'El ESP32 transmite datos, pero no se pudo guardar una medición en Supabase. ' +
+              'Revisá la consola del navegador para ver el error exacto.'
+            );
+          }
         }
       }
-    } catch (error) {
-      console.error('Error al guardar la lectura en Supabase:', error);
-
-      if (!readingErrorShown) {
-        readingErrorShown = true;
-        alert(
-          'El ESP32 transmite datos, pero no se pudo guardar la lectura en Supabase. ' +
-          'Revisá la consola del navegador para ver el error exacto.'
-        );
-      }
     } finally {
-      savingReading = false;
+      processingReadingQueue = false;
+      if (readingQueue.length) void processReadingQueue();
     }
   }
 
@@ -251,6 +269,8 @@
     }
 
     currentUserId = authData.user.id;
+    lastQueuedReadingId = null;
+    readingQueue.length = 0;
     bluetoothDevice = device;
 
     device.addEventListener(
