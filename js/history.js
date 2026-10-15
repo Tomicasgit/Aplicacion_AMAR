@@ -169,7 +169,10 @@ const AMAR_TIME_ZONE = 'America/Argentina/Buenos_Aires';
 
       const date = dateFromKey(selectedCalendarDate);
       title.textContent = 'Mediciones del ' + date.toLocaleDateString('es-AR', {
-        day: 'numeric', month: 'long', year: 'numeric'
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: AMAR_TIME_ZONE
       });
 
       const rows = readingsForDate(selectedCalendarDate)
