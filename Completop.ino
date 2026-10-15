@@ -1064,8 +1064,8 @@ void enviarDatosBLE() {
         "\"quality\":%d,"
         "\"alert\":%s"
       "}",
-      (unsigned long)secuenciaMedicion,
       timestamp,
+      (unsigned long)secuenciaMedicion,
       valorLPM,
       valorPromedio,
       estadoSensor,
@@ -1085,8 +1085,8 @@ void enviarDatosBLE() {
         "\"user_state\":\"%s\","
         "\"quality\":%d,"
         "\"alert\":%s"
-      (unsigned long)secuenciaMedicion,
       "}",
+      (unsigned long)secuenciaMedicion,
       valorLPM,
       valorPromedio,
       estadoSensor,
