@@ -88,7 +88,11 @@
     // El ID solo cambia cuando el ESP32 calcula una nueva medición válida.
     // Así no se guardan copias por cada notificación BLE repetida.
     lastQueuedReadingId = readingId;
-    readingQueue.push({ ...data });
+    readingQueue.push({
+      ...data,
+      _amarUserId: currentUserId,
+      _amarDeviceId: databaseDeviceId
+    });
     void processReadingQueue();
   }
 
@@ -99,7 +103,8 @@
     try {
       while (readingQueue.length) {
         const data = readingQueue.shift();
-        const userId = currentUserId;
+        const userId = data._amarUserId;
+        const queuedDeviceId = data._amarDeviceId;
         if (!userId) continue;
 
         try {
@@ -128,13 +133,13 @@
           }
 
           const now = Date.now();
-          if (databaseDeviceId && now - lastSeenUpdate >= 15000) {
+          if (queuedDeviceId && now - lastSeenUpdate >= 15000) {
             lastSeenUpdate = now;
 
             const { error: updateError } = await supabaseClient
               .from('devices')
               .update({ last_seen_at: new Date(now).toISOString() })
-              .eq('id', databaseDeviceId)
+              .eq('id', queuedDeviceId)
               .eq('user_id', userId);
 
             if (updateError) {
@@ -270,7 +275,6 @@
 
     currentUserId = authData.user.id;
     lastQueuedReadingId = null;
-    readingQueue.length = 0;
     bluetoothDevice = device;
 
     device.addEventListener(
