@@ -74,7 +74,7 @@ namespace Config {
     constexpr const char* CHARACTERISTIC_UUID =
       "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
-    constexpr unsigned long INTERVALO_TX_MS = 1000;
+    constexpr unsigned long INTERVALO_TX_MS = 250;
     constexpr size_t BUFFER_JSON = 256;
   }
 
@@ -116,6 +116,7 @@ unsigned long tiempoUltimaMedicionValida = 0;
 float lpm = 0;
 float ultimoLPM = 0;
 float promedioLPM = 0;
+uint32_t secuenciaMedicion = 0;
 
 float historialLPM[
   Config::Sensor::NUM_MUESTRAS_PROMEDIO
@@ -611,6 +612,7 @@ void procesarSensor() {
         tiempoUltimaMedicionValida = ahora;
 
         agregarMedicion(lpm);
+        ++secuenciaMedicion;
 
         Serial.printf(
           "LPM: %.1f | Promedio: %.1f\n",
@@ -1054,6 +1056,7 @@ void enviarDatosBLE() {
       json, sizeof(json),
       "{"
         "\"timestamp\":\"%s\","
+        "\"reading_id\":%lu,"
         "\"lpm\":%d,"
         "\"average\":%d,"
         "\"sensor_state\":\"%s\","
@@ -1061,6 +1064,7 @@ void enviarDatosBLE() {
         "\"quality\":%d,"
         "\"alert\":%s"
       "}",
+      (unsigned long)secuenciaMedicion,
       timestamp,
       valorLPM,
       valorPromedio,
@@ -1074,12 +1078,14 @@ void enviarDatosBLE() {
       json, sizeof(json),
       "{"
         "\"timestamp\":null,"
+        "\"reading_id\":%lu,"
         "\"lpm\":%d,"
         "\"average\":%d,"
         "\"sensor_state\":\"%s\","
         "\"user_state\":\"%s\","
         "\"quality\":%d,"
         "\"alert\":%s"
+      (unsigned long)secuenciaMedicion,
       "}",
       valorLPM,
       valorPromedio,
@@ -1131,6 +1137,7 @@ void inicializarBLE() {
 
   pCharacteristic->setValue(
     "{\"timestamp\":null,"
+    "\"reading_id\":0,"
     "\"lpm\":0,"
     "\"average\":0,"
     "\"sensor_state\":\"sin_dedo\","
