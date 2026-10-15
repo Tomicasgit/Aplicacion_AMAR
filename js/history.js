@@ -1,17 +1,21 @@
 let heartReadings = [];
-    let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires';
     let selectedCalendarDate = localDateKey(new Date());
+    let calendarMonth = dateFromKey(`${selectedCalendarDate.slice(0, 7)}-01`);
 
     function localDateKey(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: ARGENTINA_TIME_ZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(date);
+      const part = type => parts.find(item => item.type === type)?.value;
+      return `${part('year')}-${part('month')}-${part('day')}`;
     }
 
     function dateFromKey(key) {
-      const [y, m, d] = key.split('-').map(Number);
-      return new Date(y, m - 1, d);
+      return new Date(`${key}T00:00:00-03:00`);
     }
 
     function readingsForDate(key) {
@@ -62,12 +66,8 @@ let heartReadings = [];
       const container = $('#weeklySummary');
       if (!container) return;
 
-      const today = new Date();
-      const monday = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
+      const today = dateFromKey(localDateKey(new Date()));
+      const monday = new Date(today);
 
       const weekday = (monday.getDay() + 6) % 7;
       monday.setDate(monday.getDate() - weekday);
@@ -147,7 +147,7 @@ let heartReadings = [];
 
       const date = dateFromKey(selectedCalendarDate);
       title.textContent = 'Mediciones del ' + date.toLocaleDateString('es-AR', {
-        day: 'numeric', month: 'long', year: 'numeric'
+        day: 'numeric', month: 'long', year: 'numeric', timeZone: ARGENTINA_TIME_ZONE
       });
 
       const rows = readingsForDate(selectedCalendarDate)
@@ -162,7 +162,7 @@ let heartReadings = [];
         const date = new Date(r.recorded_at);
         const time = Number.isNaN(date.getTime())
           ? 'Hora no disponible'
-          : date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+          : date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', timeZone: ARGENTINA_TIME_ZONE });
 
         return `<div class="record-item"><div class="record-info">
           <strong>${escapeHTML(String(r.lpm))} LPM</strong>
@@ -179,7 +179,7 @@ let heartReadings = [];
       const year = calendarMonth.getFullYear();
       const month = calendarMonth.getMonth();
       label.textContent = calendarMonth.toLocaleDateString('es-AR', {
-        month: 'long', year: 'numeric'
+        month: 'long', year: 'numeric', timeZone: ARGENTINA_TIME_ZONE
       });
 
       const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -247,7 +247,7 @@ let heartReadings = [];
 
       heartReadings = allReadings;
       selectedCalendarDate = localDateKey(new Date());
-      calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      calendarMonth = dateFromKey(`${selectedCalendarDate.slice(0, 7)}-01`);
       renderDailySummary();
       renderCalendar();
     }
