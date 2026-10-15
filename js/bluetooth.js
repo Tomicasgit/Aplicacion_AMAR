@@ -8,7 +8,9 @@
   let currentUserId = null;
   let lastSeenUpdate = 0;
   let lastReadingAttemptAt = 0;
-  const READING_SAVE_INTERVAL_MS = 60000;
+  // Guardar una lectura válida cada 5 segundos. La interfaz sigue actualizándose
+  // con cada notificación BLE, sin crear decenas de miles de filas por día.
+  const READING_SAVE_INTERVAL_MS = 5000;
   let savingReading = false;
   let readingErrorShown = false;
 
