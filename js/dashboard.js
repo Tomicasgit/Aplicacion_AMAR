@@ -78,7 +78,9 @@
 
         $('#bpm').textContent = reading?.lpm ?? '--';
         $('#readingTime').textContent = reading?.recorded_at
-          ? new Date(reading.recorded_at).toLocaleString()
+          ? new Date(reading.recorded_at).toLocaleString('es-AR', {
+              timeZone: 'America/Argentina/Buenos_Aires'
+            })
           : 'Sin datos';
 
         $('#contactsCount').textContent = results[3].count ?? 0;
