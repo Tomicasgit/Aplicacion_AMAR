@@ -45,7 +45,7 @@
       }
       if (bpm) bpm.textContent = String(data.lpm);
       if (readingTime) {
-        readingTime.textContent = new Date().toLocaleTimeString('es-AR');
+        readingTime.textContent = new Date().toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
       }
       if (heartState) heartState.textContent = 'Monitoreando';
       return;
